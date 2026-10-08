@@ -24,7 +24,7 @@
     }
     body {
       font-family: 'Noto Sans KR', sans-serif;
-      background-color: #090d16;
+      background-color: #030712;
       color: #f8fafc;
       overflow: hidden;
     }
@@ -35,9 +35,12 @@
       -webkit-text-stroke: 1.5px #000;
     }
     .glass-panel {
-      background: rgba(15, 23, 42, 0.88);
-      backdrop-filter: blur(16px);
+      background: rgba(15, 23, 42, 0.94);
+      backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .glow-amber {
+      box-shadow: 0 0 35px rgba(245, 158, 11, 0.5);
     }
     .glow-green {
       box-shadow: 0 0 25px rgba(34, 197, 94, 0.5);
@@ -45,34 +48,22 @@
     .glow-red {
       box-shadow: 0 0 25px rgba(239, 68, 68, 0.5);
     }
-    .glow-amber {
-      box-shadow: 0 0 30px rgba(245, 158, 11, 0.6);
-    }
-    /* Toast notice styling */
     #toast-message {
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    /* Custom scrollbars */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: rgba(0,0,0,0.2);
-    }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(245, 158, 11, 0.5);
-      border-radius: 3px;
-    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+    ::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.5); border-radius: 3px; }
   </style>
 </head>
 <body class="w-screen h-screen flex flex-col justify-between items-center relative select-none">
 
-  <!-- Top Navigation Header -->
+  <!-- Top Navigation Bar -->
   <header class="w-full max-w-5xl px-4 py-2 flex items-center justify-between z-20">
     <div class="flex items-center gap-3">
-      <div class="bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 px-3.5 py-1 rounded-2xl font-black text-xs md:text-sm flex items-center gap-2 shadow-lg">
+      <div class="bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 px-3.5 py-1 rounded-2xl font-black text-xs md:text-sm flex items-center gap-2 shadow-lg">
         <i class="fa-solid fa-graduation-cap"></i>
-        <span>대학생 칼퇴 대작전</span>
+        <span>대학생 칼퇴 대작전 (RHYTHM 1-LANE)</span>
       </div>
       <div id="player-badge" class="bg-slate-800/90 border border-slate-700 text-amber-300 px-3 py-1 rounded-2xl text-xs md:text-sm font-bold flex items-center gap-1.5 shadow">
         <i class="fa-solid fa-user-graduate text-amber-400"></i>
@@ -95,22 +86,22 @@
   </header>
 
   <!-- Main Game Container -->
-  <main class="relative w-full max-w-5xl flex-1 max-h-[720px] my-auto px-2 flex flex-col items-center justify-center">
-    <div id="game-container" class="relative w-full h-full max-h-[640px] aspect-[16/9] rounded-3xl overflow-hidden border-2 border-slate-700/80 shadow-2xl bg-slate-950">
+  <main class="relative w-full max-w-5xl flex-1 max-h-[740px] my-auto px-2 flex flex-col items-center justify-center">
+    <div id="game-container" class="relative w-full h-full max-h-[660px] aspect-[16/9] rounded-3xl overflow-hidden border-2 border-slate-700/80 shadow-2xl bg-slate-950">
       
-      <!-- Canvas Element -->
+      <!-- Rhythm Canvas -->
       <canvas id="gameCanvas" class="w-full h-full block"></canvas>
 
-      <!-- Gameplay HUD Overlay -->
-      <div id="hud-layer" class="absolute inset-0 pointer-events-none p-4 flex flex-col justify-between hidden">
+      <!-- Gameplay HUD Layer -->
+      <div id="hud-layer" class="absolute inset-0 pointer-events-none p-3.5 flex flex-col justify-between hidden">
         <!-- Top HUD Bar -->
         <div class="flex justify-between items-start">
-          <!-- Leaving Work Gauge (퇴근 게이지) -->
+          <!-- Leaving Work Gauge -->
           <div class="w-7/12 md:w-1/2 bg-slate-950/85 p-3 rounded-2xl border border-slate-700/80 shadow-xl pointer-events-auto backdrop-blur-md">
             <div class="flex justify-between items-center mb-1.5">
               <span class="text-xs md:text-sm font-black text-emerald-400 flex items-center gap-1.5">
                 <i class="fa-solid fa-person-running"></i>
-                <span id="hud-stage-label">STAGE 1</span> - 칼퇴 게이지
+                <span id="hud-stage-label">STAGE 1</span> - 칼퇴 수치
               </span>
               <span id="hud-gauge-text" class="text-xs md:text-sm font-extrabold text-amber-300">20%</span>
             </div>
@@ -119,66 +110,59 @@
             </div>
           </div>
 
-          <!-- Score & Stage Badge -->
+          <!-- Score & BPM & Combo Badge -->
           <div class="bg-slate-950/85 px-4 py-2 rounded-2xl border border-slate-700/80 shadow-xl pointer-events-auto backdrop-blur-md text-right">
-            <div class="text-[10px] md:text-xs text-slate-400 uppercase tracking-widest font-bold">민첩 점수</div>
-            <div id="hud-score" class="text-xl md:text-2xl font-black text-amber-400 font-title tracking-wide">0</div>
-            <div class="text-[10px] text-slate-400 font-bold mt-0.5">난이도 <span id="hud-difficulty-tag" class="text-emerald-400 font-extrabold">쉬움</span></div>
+            <div class="flex items-center justify-end gap-2 text-xs font-black text-amber-400">
+              <span class="bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-lg border border-amber-500/30">
+                <i class="fa-solid fa-music mr-1"></i><span id="hud-bpm-text">128</span> BPM
+              </span>
+              <span id="hud-combo-badge" class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-lg border border-emerald-500/30 hidden">
+                <span id="hud-combo-count">0</span> COMBO
+              </span>
+            </div>
+            <div id="hud-score" class="text-xl md:text-2xl font-black text-amber-400 font-title tracking-wide mt-0.5">0</div>
           </div>
         </div>
 
-        <!-- Dynamic Announcement Banner -->
-        <div class="self-center my-auto">
-          <div id="hud-announcement" class="hidden bg-slate-950/90 text-amber-300 border border-amber-500/50 px-6 py-2 rounded-2xl font-black text-base md:text-lg text-center animate-bounce shadow-2xl backdrop-blur-sm">
-            ⚡ 과제 폭탄 주의!
-          </div>
-        </div>
-
-        <!-- Bottom Controls Guide -->
-        <div class="flex justify-between items-end">
-          <div class="text-xs text-slate-300 bg-slate-950/85 px-3 py-1.5 rounded-xl border border-slate-800 backdrop-blur-md">
-            <span class="text-amber-400 font-bold"><i class="fa-solid fa-keyboard mr-1"></i>이동:</span> <span id="hud-key-guide">▲ / ▼</span>
-          </div>
-          <div class="text-xs text-slate-300 bg-slate-950/85 px-3 py-1.5 rounded-xl border border-slate-800 backdrop-blur-md">
-            <span class="text-emerald-400 font-bold"><i class="fa-solid fa-clock mr-1"></i>상태:</span> 시간 흐름 시 자동 칼퇴!
+        <!-- Spacebar Hit / Hold Indicator -->
+        <div class="w-full max-w-md mx-auto bg-slate-950/90 border-2 border-amber-400 rounded-2xl p-2.5 shadow-2xl backdrop-blur-md pointer-events-auto text-center animate-pulse">
+          <div class="text-xs md:text-sm font-black text-amber-300 flex items-center justify-center gap-2">
+            <span id="hud-key-label-display" class="bg-amber-500 text-slate-950 px-2.5 py-0.5 rounded-lg font-mono font-black">[SPACEBAR]</span>
+            <span>단타는 탭! 롱노트는 홀드 유지! ⚡</span>
           </div>
         </div>
       </div>
 
-      <!-- 1. MAIN MENU SCREEN (메인 화면) -->
+      <!-- Main Menu Modal -->
       <div id="modal-main-menu" class="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 bg-slate-950/85 backdrop-blur-md">
         <div class="max-w-md w-full glass-panel p-6 md:p-8 rounded-3xl border border-slate-700/80 text-center shadow-2xl flex flex-col items-center glow-amber">
           
           <div class="w-20 h-20 bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-300 rounded-3xl flex items-center justify-center mb-3 shadow-lg shadow-amber-500/30 ring-4 ring-amber-400/20 animate-pulse">
-            <i class="fa-solid fa-running text-4xl text-slate-950"></i>
+            <i class="fa-solid fa-compact-disc text-4xl text-slate-950 animate-spin" style="animation-duration: 3s;"></i>
           </div>
 
           <h1 class="text-2xl md:text-3xl font-black text-amber-400 font-title mb-1 text-stroke tracking-wide">
             민첩한 하루 되세요!
           </h1>
-          <p class="text-xs md:text-sm text-slate-300 font-bold mb-6">대학생의 칼퇴 대작전 🏃‍♂️💨</p>
+          <p class="text-xs md:text-sm text-slate-300 font-bold mb-6">대학생의 칼퇴 대작전: 리듬 & 롱노트 피하기 🏃‍♂️⚡</p>
 
           <div class="w-full space-y-3">
-            <!-- Game Start Button -->
             <button id="btn-main-start" class="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-base md:text-lg rounded-2xl shadow-xl transition active:scale-95 flex items-center justify-center gap-2">
-              <i class="fa-solid fa-gamepad text-xl"></i>
+              <i class="fa-solid fa-play text-xl"></i>
               <span>🎮 게임 시작</span>
             </button>
 
-            <!-- Settings Button -->
             <button id="btn-main-settings" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm rounded-2xl border border-slate-700 transition active:scale-95 flex items-center justify-center gap-2">
               <i class="fa-solid fa-sliders text-amber-400"></i>
               <span>⚙️ 게임 설정</span>
             </button>
 
-            <!-- Save / Load Button -->
             <button id="btn-main-saveload" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm rounded-2xl border border-slate-700 transition active:scale-95 flex items-center justify-center gap-2">
               <i class="fa-solid fa-floppy-disk text-emerald-400"></i>
               <span>💾 저장 / 불러오기</span>
             </button>
           </div>
 
-          <!-- Record info footer -->
           <div class="mt-6 pt-4 border-t border-slate-800 w-full flex justify-between items-center text-xs text-slate-400 font-bold">
             <span><i class="fa-solid fa-trophy text-amber-400 mr-1"></i> 최고 기록</span>
             <span id="main-high-score" class="text-amber-300 font-extrabold text-sm">0점</span>
@@ -187,7 +171,7 @@
         </div>
       </div>
 
-      <!-- 2. STUDENT NAME PROMPT MODAL (시작 후 이름 입력) -->
+      <!-- Student Name & Stage Input Modal -->
       <div id="modal-name-prompt" class="absolute inset-0 z-40 flex flex-col items-center justify-center p-6 bg-slate-950/90 backdrop-blur-lg hidden">
         <div class="max-w-md w-full glass-panel p-6 md:p-8 rounded-3xl border border-amber-500/40 text-center shadow-2xl flex flex-col items-center">
           
@@ -198,9 +182,9 @@
           <h2 class="text-xl md:text-2xl font-black text-amber-400 font-title mb-1">
             학생증 이름을 입력하세요
           </h2>
-          <p class="text-xs text-slate-300 font-bold mb-5">스토리 대화 및 기록에 표시될 본인의 이름입니다.</p>
+          <p class="text-xs text-slate-300 font-bold mb-4">스토리 대화 및 최고 기록에 저장되는 캐릭터 이름입니다.</p>
 
-          <div class="w-full text-left mb-6">
+          <div class="w-full text-left mb-4">
             <label for="input-student-name" class="block text-xs font-bold text-slate-300 mb-2">
               플레이어 이름 (최대 8자):
             </label>
@@ -212,19 +196,11 @@
             </div>
           </div>
 
-          <!-- Stage Selection Preview -->
-          <div class="w-full mb-6 text-left">
-            <label class="block text-xs font-bold text-slate-300 mb-2">시작할 스테이지 선택:</label>
-            <div class="grid grid-cols-3 gap-2">
-              <button id="btn-select-stg1" class="stage-select-btn bg-amber-500 text-slate-950 p-2 rounded-xl text-xs font-black border-2 border-amber-400 text-center">
-                Stg 1 (쉬움)
-              </button>
-              <button id="btn-select-stg2" class="stage-select-btn bg-slate-800 text-slate-400 p-2 rounded-xl text-xs font-bold border border-slate-700 text-center opacity-50 cursor-not-allowed">
-                Stg 2 (보통)
-              </button>
-              <button id="btn-select-stg3" class="stage-select-btn bg-slate-800 text-slate-400 p-2 rounded-xl text-xs font-bold border border-slate-700 text-center opacity-50 cursor-not-allowed">
-                Stg 3 (어려움)
-              </button>
+          <!-- Stage Selection Grid (6 Stages) -->
+          <div class="w-full mb-5 text-left">
+            <label class="block text-xs font-bold text-slate-300 mb-2">시작할 스테이지 선택 (1~6):</label>
+            <div class="grid grid-cols-3 gap-2" id="stage-select-grid">
+              <!-- Rendered dynamically -->
             </div>
           </div>
 
@@ -241,11 +217,10 @@
         </div>
       </div>
 
-      <!-- 3. STORY DIALOGUE OVERLAY (스토리 비주얼 노블) -->
-      <div id="modal-story" class="absolute inset-0 z-50 flex flex-col justify-end p-4 bg-slate-950/70 backdrop-blur-md hidden">
+      <!-- Story Dialogue Visual Novel Modal -->
+      <div id="modal-story" class="absolute inset-0 z-50 flex flex-col justify-end p-4 bg-slate-950/80 backdrop-blur-md hidden">
         <div class="w-full glass-panel p-4 md:p-5 rounded-2xl border border-amber-500/50 shadow-2xl relative flex flex-col md:flex-row gap-4 items-center">
           
-          <!-- Character Portrait Box -->
           <div class="w-24 h-24 md:w-32 md:h-32 bg-slate-900 border-2 border-amber-400 rounded-2xl overflow-hidden flex-shrink-0 flex items-center justify-center shadow-lg relative">
             <canvas id="portraitCanvas" width="128" height="128" class="w-full h-full"></canvas>
             <span id="story-speaker-tag" class="absolute bottom-0 inset-x-0 bg-amber-500 text-slate-950 text-[10px] font-black text-center py-0.5 uppercase">
@@ -253,7 +228,6 @@
             </span>
           </div>
 
-          <!-- Dialogue Content Box -->
           <div class="flex-1 w-full text-left">
             <div class="flex justify-between items-center mb-1">
               <h3 id="story-speaker-name" class="text-base md:text-lg font-black text-amber-300 font-title">
@@ -264,7 +238,7 @@
               </span>
             </div>
             <p id="story-text-content" class="text-sm md:text-base text-slate-100 font-medium leading-relaxed min-h-[3.2rem]">
-              "오늘만 버티면 드디어 칼퇴다... 교수님의 과제 폭탄을 뚫고 무사히 집으로 돌아갈 수 있을까?"
+              "오늘만 버티면 드디어 칼퇴다!"
             </p>
             <div class="mt-3 flex justify-end">
               <button id="btn-story-next" class="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs md:text-sm rounded-xl shadow-lg transition active:scale-95 flex items-center gap-1.5">
@@ -277,7 +251,7 @@
         </div>
       </div>
 
-      <!-- 4. PAUSE MENU MODAL -->
+      <!-- Pause Overlay -->
       <div id="modal-pause" class="absolute inset-0 z-40 flex flex-col items-center justify-center p-6 bg-slate-950/85 backdrop-blur-md hidden">
         <div class="max-w-sm w-full glass-panel p-6 rounded-3xl text-center shadow-2xl border border-slate-700">
           <i class="fa-solid fa-circle-pause text-5xl text-amber-400 mb-3"></i>
@@ -297,7 +271,7 @@
         </div>
       </div>
 
-      <!-- 5. RESULT MODAL (스테이지 클리어 / 게임 오버) -->
+      <!-- Stage Result Modal -->
       <div id="modal-result" class="absolute inset-0 z-40 flex flex-col items-center justify-center p-6 bg-slate-950/90 backdrop-blur-md hidden">
         <div id="result-card" class="max-w-md w-full glass-panel p-6 md:p-8 rounded-3xl border text-center shadow-2xl flex flex-col items-center">
           
@@ -318,12 +292,12 @@
               <span id="result-player-name" class="text-amber-300 font-extrabold">김민첩</span>
             </div>
             <div class="flex justify-between text-slate-400 font-bold">
-              <span>최종 점수</span>
+              <span>최종 스코어</span>
               <span id="result-final-score" class="text-amber-400 font-black text-base">0점</span>
             </div>
             <div class="flex justify-between text-slate-400 font-bold">
-              <span>달성 퇴근율</span>
-              <span id="result-final-gauge" class="text-emerald-400 font-black">100%</span>
+              <span>최고 리듬 판정</span>
+              <span id="result-perfect-count" class="text-emerald-400 font-black">0 PERFECTS</span>
             </div>
           </div>
 
@@ -339,7 +313,7 @@
         </div>
       </div>
 
-      <!-- 6. SETTINGS MODAL (설정 & 키 변경) -->
+      <!-- Settings Modal -->
       <div id="modal-settings" class="absolute inset-0 z-50 flex flex-col items-center justify-center p-6 bg-slate-950/85 backdrop-blur-md hidden">
         <div class="max-w-md w-full glass-panel p-6 rounded-3xl border border-slate-700 shadow-2xl text-left max-h-[90vh] overflow-y-auto">
           
@@ -353,48 +327,38 @@
             </button>
           </div>
 
-          <!-- Volume Controls -->
           <div class="space-y-4 mb-6">
-            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">사운드 설정 (Synthesizer)</h4>
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">사운드 볼륨 (Synthesizer Volume)</h4>
             
             <div>
               <div class="flex justify-between text-xs font-bold mb-1">
                 <span class="text-slate-200">배경음악 (BGM) Volume</span>
-                <span id="bgm-val-text" class="text-amber-400">70%</span>
+                <span id="bgm-val-text" class="text-amber-400">80%</span>
               </div>
-              <input type="range" id="slider-bgm" min="0" max="100" value="70" class="w-full accent-amber-400 cursor-pointer">
+              <input type="range" id="slider-bgm" min="0" max="100" value="80" class="w-full accent-amber-400 cursor-pointer">
             </div>
 
             <div>
               <div class="flex justify-between text-xs font-bold mb-1">
                 <span class="text-slate-200">효과음 (SFX) Volume</span>
-                <span id="sfx-val-text" class="text-amber-400">80%</span>
+                <span id="sfx-val-text" class="text-amber-400">85%</span>
               </div>
-              <input type="range" id="slider-sfx" min="0" max="100" value="80" class="w-full accent-amber-400 cursor-pointer">
+              <input type="range" id="slider-sfx" min="0" max="100" value="85" class="w-full accent-amber-400 cursor-pointer">
             </div>
           </div>
 
-          <!-- Key Binding Customization -->
           <div class="space-y-3 mb-6">
-            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">조작키 커스텀 변경</h4>
-            <div class="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 text-xs text-slate-300 space-y-3">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">조작키 커스텀 (1키 타격 & 롱노트)</h4>
+            <div class="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 text-xs text-slate-300 space-y-2.5">
               <div class="flex justify-between items-center">
-                <span class="font-bold">위로 이동 (Lane Up)</span>
-                <button id="btn-rebind-up" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono font-black px-3 py-1.5 rounded-lg border border-slate-600 transition">
-                  <span id="key-bind-up-label">ArrowUp</span>
+                <span class="font-bold">리듬 타격 / 홀드 키</span>
+                <button id="btn-rebind-hit" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono font-black px-3 py-1 rounded-lg border border-slate-600 transition">
+                  <span id="key-bind-hit-label">Space</span>
                 </button>
               </div>
-              <div class="flex justify-between items-center">
-                <span class="font-bold">아래로 이동 (Lane Down)</span>
-                <button id="btn-rebind-down" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono font-black px-3 py-1.5 rounded-lg border border-slate-600 transition">
-                  <span id="key-bind-down-label">ArrowDown</span>
-                </button>
-              </div>
-              <p class="text-[11px] text-slate-500">* 버튼을 누른 후 변경할 키보드 버튼을 누르세요 (W/S 호환 지원).</p>
             </div>
           </div>
 
-          <!-- Bottom Actions -->
           <div class="pt-3 border-t border-slate-800 flex justify-between items-center">
             <button id="btn-reset-data" class="text-xs text-red-400 hover:text-red-300 underline font-bold">
               전체 초기화
@@ -407,14 +371,14 @@
         </div>
       </div>
 
-      <!-- 7. SAVE / LOAD MODAL (저장 및 불러오기) -->
+      <!-- Save / Load Modal -->
       <div id="modal-saveload" class="absolute inset-0 z-50 flex flex-col items-center justify-center p-6 bg-slate-950/85 backdrop-blur-md hidden">
         <div class="max-w-md w-full glass-panel p-6 rounded-3xl border border-slate-700 shadow-2xl text-left">
           
           <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
             <h3 class="text-xl font-black text-emerald-400 font-title flex items-center gap-2">
               <i class="fa-solid fa-floppy-disk"></i>
-              게임 진행 저장 / 불러오기
+              진행 상태 저장 / 불러오기
             </h3>
             <button id="btn-close-saveload" class="text-slate-400 hover:text-slate-200 text-xl p-1">
               <i class="fa-solid fa-xmark"></i>
@@ -450,66 +414,34 @@
         </div>
       </div>
 
-      <!-- Toast Feedback Popup -->
+      <!-- Toast Notification -->
       <div id="toast-message" class="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 text-amber-300 border border-amber-500 px-5 py-2 rounded-2xl text-xs font-black shadow-2xl pointer-events-none opacity-0 translate-y-[-10px]">
         저장되었습니다!
       </div>
 
     </div>
 
-    <!-- Mobile Touch Controls -->
-    <div id="mobile-touch-controls" class="w-full max-w-lg mt-3 flex justify-between gap-4 px-2 md:hidden">
-      <button id="btn-touch-up" class="flex-1 py-3.5 bg-slate-800 active:bg-amber-500 active:text-slate-950 text-slate-200 border border-slate-700 rounded-2xl font-black text-base shadow-lg flex items-center justify-center gap-2">
-        <i class="fa-solid fa-chevron-up"></i> 위로 (Up)
-      </button>
-      <button id="btn-touch-down" class="flex-1 py-3.5 bg-slate-800 active:bg-amber-500 active:text-slate-950 text-slate-200 border border-slate-700 rounded-2xl font-black text-base shadow-lg flex items-center justify-center gap-2">
-        <i class="fa-solid fa-chevron-down"></i> 아래로 (Down)
+    <!-- Mobile Touch Controller -->
+    <div id="mobile-touch-controls" class="w-full max-w-sm mt-3 flex justify-center px-2 md:hidden">
+      <button id="btn-touch-hit" class="w-full py-4 bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 text-slate-950 active:scale-95 border-2 border-amber-200 rounded-2xl font-black text-base shadow-xl flex items-center justify-center gap-2">
+        <i class="fa-solid fa-bolt text-lg"></i>
+        <span>TOUCH & HOLD (터치 / 홀드)</span>
       </button>
     </div>
   </main>
 
-  <footer class="py-2 text-center text-[11px] text-slate-500 font-semibold">
-    민첩한 하루 되세요! © 2026 대학생 칼퇴 대작전. Single File HTML5 Engine.
-  </footer>
-
   <script>
-    // --- Application State & Configuration ---
     const STAGE_CONFIG = {
-      1: {
-        name: "1교시 대형 강의 탈출기",
-        difficultyText: "쉬움 (Easy)",
-        bgType: "classroom",
-        speed: 5.8,
-        autoGaugeSpeed: 0.38,
-        obstacleDamage: 10,
-        spawnInterval: 65,
-        greenRate: 0.18
-      },
-      2: {
-        name: "2교시 랩실 교수님과 학부연구생 소환",
-        difficultyText: "보통 (Normal)",
-        bgType: "laboratory",
-        speed: 7.8,
-        autoGaugeSpeed: 0.34,
-        obstacleDamage: 14,
-        spawnInterval: 50,
-        greenRate: 0.15
-      },
-      3: {
-        name: "3교시 총장님의 졸업 논문 직탄 폭격",
-        difficultyText: "어려움 (Hard)",
-        bgType: "maingate",
-        speed: 10.2,
-        autoGaugeSpeed: 0.28,
-        obstacleDamage: 18,
-        spawnInterval: 38,
-        greenRate: 0.12
-      }
+      1: { name: "1교시: 상큼한 아침의 시작", difficultyText: "쉬움 (128 BPM)", bpm: 128, speed: 6.2, autoGaugeSpeed: 0.28, obstacleDamage: 12, greenRate: 0.28, holdRate: 0.25 },
+      2: { name: "2교시: 랩실 노예 추노곡", difficultyText: "보통 (142 BPM)", bpm: 142, speed: 7.2, autoGaugeSpeed: 0.26, obstacleDamage: 14, greenRate: 0.24, holdRate: 0.30 },
+      3: { name: "3교시: 동아리방 펑키 댄스", difficultyText: "정상 (156 BPM)", bpm: 156, speed: 8.4, autoGaugeSpeed: 0.24, obstacleDamage: 15, greenRate: 0.22, holdRate: 0.32 },
+      4: { name: "4교시: 대학 축제 하이텐션", difficultyText: "어려움 (170 BPM)", bpm: 170, speed: 9.6, autoGaugeSpeed: 0.22, obstacleDamage: 17, greenRate: 0.20, holdRate: 0.35 },
+      5: { name: "5교시: 기말고사 & 팀플 대혼란", difficultyText: "익스트림 (185 BPM)", bpm: 185, speed: 11.0, autoGaugeSpeed: 0.20, obstacleDamage: 18, greenRate: 0.18, holdRate: 0.38 },
+      6: { name: "6교시: 오의! 칼퇴 전설", difficultyText: "마스터 (200 BPM)", bpm: 200, speed: 12.5, autoGaugeSpeed: 0.18, obstacleDamage: 20, greenRate: 0.15, holdRate: 0.40 }
     };
 
     const CONFIG = {
-      lanes: [0.25, 0.52, 0.78], // Lane Y ratios
-      maxGauge: 100,
+      maxGauge: 100
     };
 
     let gameState = {
@@ -518,34 +450,36 @@
       unlockedStage: 1,
       currentStage: 1,
       score: 0,
-      gauge: 20,                  // Leaving work gauge %
+      gauge: 20,
+      combo: 0,
+      perfectHits: 0,
       isPlaying: false,
       isPaused: false,
       gameTime: 0,
-      bgmVol: 0.7,
-      sfxVol: 0.8,
-      keyUp: 'ArrowUp',
-      keyDown: 'ArrowDown',
-      currentLane: 1,
-      targetY: 0,
-      playerY: 0,
+      bgmVol: 0.8,
+      sfxVol: 0.85,
+      keyHit: ' ',
       screenShake: 0,
       storyIndex: 0,
-      storyMode: 'intro',
+      playerBounceTick: 0,
+      isHoldingKey: false
     };
 
-    // Canvas references
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const portraitCanvas = document.getElementById('portraitCanvas');
     const pCtx = portraitCanvas.getContext('2d');
 
-    // --- Web Audio API Synthesizer ---
     let audioCtx = null;
+    let masterGainNode = null;
+    let nextBeatTime = 0;
+    let beatStep = 0;
 
     function initAudio() {
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        masterGainNode = audioCtx.createGain();
+        masterGainNode.connect(audioCtx.destination);
       }
       if (audioCtx.state === 'suspended') {
         audioCtx.resume();
@@ -557,84 +491,170 @@
       const now = audioCtx.currentTime;
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-
+      osc.connect(gain); gain.connect(masterGainNode);
       const vol = gameState.sfxVol;
 
-      if (type === 'jump') {
+      if (type === 'hit_perfect') {
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(280, now);
-        osc.frequency.exponentialRampToValueAtTime(620, now + 0.1);
-        gain.gain.setValueAtTime(0.2 * vol, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
-        osc.start(now);
-        osc.stop(now + 0.1);
-      } else if (type === 'hit') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(190, now);
-        osc.frequency.linearRampToValueAtTime(50, now + 0.22);
-        gain.gain.setValueAtTime(0.35 * vol, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.22);
-        osc.start(now);
-        osc.stop(now + 0.22);
-      } else if (type === 'item') {
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.setValueAtTime(1318.51, now + 0.05);
+        gain.gain.setValueAtTime(0.4 * vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+        osc.start(now); osc.stop(now + 0.16);
+      } else if (type === 'hit_great') {
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(523.25, now);
-        osc.frequency.setValueAtTime(659.25, now + 0.07);
-        osc.frequency.setValueAtTime(783.99, now + 0.14);
-        gain.gain.setValueAtTime(0.3 * vol, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
-        osc.start(now);
-        osc.stop(now + 0.25);
-      } else if (type === 'win') {
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(440, now);
-        osc.frequency.setValueAtTime(554.37, now + 0.12);
-        osc.frequency.setValueAtTime(659.25, now + 0.24);
-        osc.frequency.setValueAtTime(880, now + 0.36);
-        gain.gain.setValueAtTime(0.25 * vol, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.6);
-        osc.start(now);
-        osc.stop(now + 0.6);
+        osc.frequency.setValueAtTime(659.25, now);
+        osc.frequency.setValueAtTime(880, now + 0.05);
+        gain.gain.setValueAtTime(0.35 * vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+        osc.start(now); osc.stop(now + 0.14);
+      } else if (type === 'hold_tick') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1046.50, now);
+        gain.gain.setValueAtTime(0.15 * vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+        osc.start(now); osc.stop(now + 0.04);
+      } else if (type === 'miss') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.linearRampToValueAtTime(60, now + 0.2);
+        gain.gain.setValueAtTime(0.4 * vol, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+        osc.start(now); osc.stop(now + 0.2);
+      } else if (type === 'step') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.exponentialRampToValueAtTime(750, now + 0.05);
+        gain.gain.setValueAtTime(0.2 * vol, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now); osc.stop(now + 0.05);
       }
     }
 
-    let bgmInterval = null;
-    let bgmNoteStep = 0;
-    const bgmNotes = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 293.66, 349.23, 440.00, 349.23];
+    // 6 Distinct Synthesized Stage BGMs
+    const MUSIC_PRESETS = {
+      1: { // C-Major Bright Chiptune
+        bass: [130.81, 130.81, 164.81, 196.00, 130.81, 174.61, 196.00, 220.00],
+        lead: [523.25, 659.25, 783.99, 1046.50, 659.25, 783.99, 880.00, 1046.50, 587.33, 698.46, 880.00, 1174.66, 659.25, 783.99, 1046.50, 1318.51],
+        leadType: 'square'
+      },
+      2: { // A-Minor Dark Synthwave
+        bass: [110.00, 110.00, 130.81, 146.83, 110.00, 130.81, 164.81, 146.83],
+        lead: [440.00, 523.25, 659.25, 880.00, 523.25, 659.25, 783.99, 880.00, 392.00, 523.25, 659.25, 783.99, 440.00, 587.33, 659.25, 880.00],
+        leadType: 'sawtooth'
+      },
+      3: { // F-Major Disco Funk
+        bass: [174.61, 174.61, 220.00, 261.63, 174.61, 220.00, 261.63, 293.66],
+        lead: [698.46, 880.00, 1046.50, 1318.51, 880.00, 1046.50, 1174.66, 1318.51, 783.99, 987.77, 1174.66, 1396.91, 698.46, 880.00, 1046.50, 1318.51],
+        leadType: 'triangle'
+      },
+      4: { // D-Minor High-Energy Electro
+        bass: [146.83, 146.83, 174.61, 220.00, 146.83, 174.61, 220.00, 261.63],
+        lead: [587.33, 698.46, 880.00, 1174.66, 698.46, 880.00, 1046.50, 1174.66, 523.25, 659.25, 783.99, 1046.50, 587.33, 880.00, 1174.66, 1396.91],
+        leadType: 'sawtooth'
+      },
+      5: { // E-Minor EDM Trap Boss
+        bass: [82.41, 82.41, 98.00, 123.47, 82.41, 98.00, 110.00, 123.47],
+        lead: [659.25, 783.99, 987.77, 1318.51, 783.99, 987.77, 1174.66, 1318.51, 587.33, 783.99, 987.77, 1174.66, 659.25, 987.77, 1318.51, 1567.98],
+        leadType: 'sawtooth'
+      },
+      6: { // C-Minor High-Speed Eurobeat
+        bass: [130.81, 130.81, 155.56, 196.00, 130.81, 155.56, 174.61, 196.00],
+        lead: [1046.50, 1244.51, 1567.98, 2093.00, 1244.51, 1567.98, 1746.14, 2093.00, 932.33, 1174.66, 1396.91, 1864.66, 1046.50, 1396.91, 1746.14, 2093.00],
+        leadType: 'square'
+      }
+    };
 
-    function startBGM() {
-      stopBGM();
-      if (gameState.bgmVol <= 0) return;
-      bgmNoteStep = 0;
-      const speedMs = gameState.currentStage === 3 ? 160 : gameState.currentStage === 2 ? 190 : 230;
+    function scheduleBeatAudio(time, step) {
+      if (!audioCtx || gameState.bgmVol <= 0) return;
+      const vol = gameState.bgmVol * 0.45; // Louder master BGM volume
+      const stg = gameState.currentStage;
+      const preset = MUSIC_PRESETS[stg];
 
-      bgmInterval = setInterval(() => {
-        if (!gameState.isPlaying || gameState.isPaused || !audioCtx) return;
-        const now = audioCtx.currentTime;
+      // 1. Kick Drum
+      if (step % 4 === 0) {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(bgmNotes[bgmNoteStep % bgmNotes.length], now);
-        gain.gain.setValueAtTime(0.07 * gameState.bgmVol, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now);
-        osc.stop(now + 0.16);
-        bgmNoteStep++;
-      }, speedMs);
-    }
-
-    function stopBGM() {
-      if (bgmInterval) {
-        clearInterval(bgmInterval);
-        bgmInterval = null;
+        osc.frequency.setValueAtTime(200, time);
+        osc.frequency.exponentialRampToValueAtTime(32, time + 0.12);
+        gain.gain.setValueAtTime(0.55 * vol, time);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
+        osc.connect(gain); gain.connect(masterGainNode);
+        osc.start(time); osc.stop(time + 0.12);
       }
+
+      // 2. Snare / Hi-hat
+      if (step % 4 === 2 || step % 2 === 1) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = step % 4 === 2 ? 'triangle' : 'sine';
+        osc.frequency.setValueAtTime(step % 4 === 2 ? 450 : 900, time);
+        gain.gain.setValueAtTime(0.2 * vol, time);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.07);
+        osc.connect(gain); gain.connect(masterGainNode);
+        osc.start(time); osc.stop(time + 0.07);
+      }
+
+      // 3. Bass synth
+      const bassNote = preset.bass[step % preset.bass.length];
+      const bassOsc = audioCtx.createOscillator();
+      const bassGain = audioCtx.createGain();
+      bassOsc.type = 'triangle';
+      bassOsc.frequency.setValueAtTime(bassNote, time);
+      bassGain.gain.setValueAtTime(0.25 * vol, time);
+      bassGain.gain.exponentialRampToValueAtTime(0.001, time + 0.14);
+      bassOsc.connect(bassGain); bassGain.connect(masterGainNode);
+      bassOsc.start(time); bassOsc.stop(time + 0.14);
+
+      // 4. Lead Melody synth
+      const leadNote = preset.lead[step % preset.lead.length];
+      const leadOsc = audioCtx.createOscillator();
+      const leadGain = audioCtx.createGain();
+      leadOsc.type = preset.leadType;
+      leadOsc.frequency.setValueAtTime(leadNote, time);
+      leadGain.gain.setValueAtTime(0.12 * vol, time);
+      leadGain.gain.exponentialRampToValueAtTime(0.001, time + 0.15);
+      leadOsc.connect(leadGain); leadGain.connect(masterGainNode);
+      leadOsc.start(time); leadOsc.stop(time + 0.15);
     }
 
-    // --- Save / Load & Toast System ---
+    // Syncopated & Varied Rhythm Maps for each Stage
+    const RHYTHM_PATTERNS = {
+      1: [0, 3, 6, 8, 11, 14],            // Syncopated 8th/16th gaps
+      2: [0, 2, 5, 8, 10, 13],            // Off-beat pulse
+      3: [0, 3, 4, 7, 10, 12, 14],        // Funk slap syncopation
+      4: [0, 2, 4, 7, 9, 11, 14],         // Fast electro bursts
+      5: [0, 2, 3, 6, 8, 10, 12, 15],     // Trap triplets
+      6: [0, 2, 4, 5, 8, 10, 12, 14]      // High-speed Eurobeat storm
+    };
+
+    function rhythmSequencerLoop() {
+      if (!gameState.isPlaying || gameState.isPaused || !audioCtx) {
+        setTimeout(rhythmSequencerLoop, 50);
+        return;
+      }
+
+      const stgCfg = STAGE_CONFIG[gameState.currentStage];
+      const secondsPerBeat = 60.0 / stgCfg.bpm / 4;
+
+      while (nextBeatTime < audioCtx.currentTime + 0.12) {
+        scheduleBeatAudio(nextBeatTime, beatStep);
+
+        // Syncopated Spawn check matching stage beat map
+        const pattern = RHYTHM_PATTERNS[gameState.currentStage];
+        const stepInBar = beatStep % 16;
+        if (pattern.includes(stepInBar)) {
+          spawnNote();
+        }
+
+        beatStep++;
+        nextBeatTime += secondsPerBeat;
+      }
+
+      setTimeout(rhythmSequencerLoop, 25);
+    }
+
     function showToast(msg) {
       const toast = document.getElementById('toast-message');
       toast.innerText = msg;
@@ -663,16 +683,11 @@
         const sfx = localStorage.getItem('college_escape_sfx');
         if (sfx !== null) gameState.sfxVol = parseFloat(sfx);
 
-        const ku = localStorage.getItem('college_escape_key_up');
-        if (ku) gameState.keyUp = ku;
-
-        const kd = localStorage.getItem('college_escape_key_down');
-        if (kd) gameState.keyDown = kd;
+        const kh = localStorage.getItem('college_escape_key_hit');
+        if (kh) gameState.keyHit = kh;
 
         updateUIHeaderAndInfo();
-      } catch (e) {
-        console.warn('LocalStorage access warning:', e);
-      }
+      } catch (e) { console.warn('LocalStorage error:', e); }
     }
 
     function saveData() {
@@ -682,12 +697,9 @@
         localStorage.setItem('college_escape_unlocked_stg', gameState.unlockedStage.toString());
         localStorage.setItem('college_escape_bgm', gameState.bgmVol.toString());
         localStorage.setItem('college_escape_sfx', gameState.sfxVol.toString());
-        localStorage.setItem('college_escape_key_up', gameState.keyUp);
-        localStorage.setItem('college_escape_key_down', gameState.keyDown);
+        localStorage.setItem('college_escape_key_hit', gameState.keyHit);
         updateUIHeaderAndInfo();
-      } catch (e) {
-        console.warn('LocalStorage save failed:', e);
-      }
+      } catch (e) { console.warn('LocalStorage save failed:', e); }
     }
 
     function updateUIHeaderAndInfo() {
@@ -704,31 +716,23 @@
       document.getElementById('bgm-val-text').innerText = `${Math.round(gameState.bgmVol * 100)}%`;
       document.getElementById('sfx-val-text').innerText = `${Math.round(gameState.sfxVol * 100)}%`;
 
-      document.getElementById('key-bind-up-label').innerText = gameState.keyUp;
-      document.getElementById('key-bind-down-label').innerText = gameState.keyDown;
-      document.getElementById('hud-key-guide').innerText = `${gameState.keyUp} / ${gameState.keyDown}`;
+      const keyText = gameState.keyHit === ' ' ? 'Spacebar' : gameState.keyHit;
+      document.getElementById('key-bind-hit-label').innerText = keyText;
+      document.getElementById('hud-key-label-display').innerText = `[${keyText.toUpperCase()}]`;
 
-      // Update Stage selection buttons
-      for (let s = 1; s <= 3; s++) {
-        const btn = document.getElementById(`btn-select-stg${s}`);
-        if (s <= gameState.unlockedStage) {
-          btn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-800', 'text-slate-400');
-          btn.classList.add('bg-amber-500', 'text-slate-950', 'border-amber-400');
-          btn.onclick = () => selectStage(s);
+      const grid = document.getElementById('stage-select-grid');
+      grid.innerHTML = '';
+      for (let s = 1; s <= 6; s++) {
+        const isUnlocked = s <= gameState.unlockedStage;
+        const btn = document.createElement('button');
+        btn.className = isUnlocked 
+          ? (s === gameState.currentStage ? "stage-select-btn bg-amber-400 text-slate-950 p-2 rounded-xl text-xs font-black border-2 border-amber-300 shadow-md" : "stage-select-btn bg-slate-800 text-amber-300 p-2 rounded-xl text-xs font-bold border border-slate-700")
+          : "stage-select-btn bg-slate-900 text-slate-600 p-2 rounded-xl text-xs font-bold border border-slate-800 opacity-50 cursor-not-allowed";
+        btn.innerText = `Stg ${s}`;
+        if (isUnlocked) {
+          btn.onclick = () => { gameState.currentStage = s; updateUIHeaderAndInfo(); };
         }
-      }
-    }
-
-    function selectStage(stg) {
-      if (stg > gameState.unlockedStage) return;
-      gameState.currentStage = stg;
-      for (let s = 1; s <= 3; s++) {
-        const btn = document.getElementById(`btn-select-stg${s}`);
-        if (s === stg) {
-          btn.className = "stage-select-btn bg-amber-400 text-slate-950 p-2 rounded-xl text-xs font-black border-2 border-amber-300 shadow-md";
-        } else if (s <= gameState.unlockedStage) {
-          btn.className = "stage-select-btn bg-slate-800 text-amber-300 p-2 rounded-xl text-xs font-bold border border-slate-700";
-        }
+        grid.appendChild(btn);
       }
     }
 
@@ -737,110 +741,66 @@
       const rect = container.getBoundingClientRect();
       canvas.width = rect.width;
       canvas.height = rect.height;
-      if (gameState) {
-        gameState.targetY = canvas.height * CONFIG.lanes[gameState.currentLane];
-      }
     }
-
     window.addEventListener('resize', resizeCanvas);
 
-    // --- Canvas Drawing: Brown-Haired SD Student Character ---
     function drawBrownHairSDStudent(ctx, x, y, frameTick) {
       ctx.save();
       ctx.translate(x, y);
 
-      const bounce = Math.sin(frameTick * 0.28) * 4;
-      const legAngle = Math.sin(frameTick * 0.32) * 0.6;
+      const bounce = Math.sin(frameTick * 0.3) * 4 - (gameState.playerBounceTick > 0 ? 12 : 0);
+      if (gameState.playerBounceTick > 0) gameState.playerBounceTick--;
 
       // Shadow
-      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
       ctx.beginPath();
-      ctx.ellipse(0, 22, 22, 8, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 18, 28, 9, 0, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.translate(0, bounce);
 
-      // --- Legs & Red Shoes ---
-      ctx.lineWidth = 6;
-      ctx.lineCap = 'round';
-      ctx.strokeStyle = '#1e293b';
+      // Legs
+      ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.strokeStyle = '#1e293b';
+      ctx.beginPath(); ctx.moveTo(-6, 4); ctx.lineTo(-6, 16); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(6, 4); ctx.lineTo(6, 16); ctx.stroke();
 
-      // Back leg
-      ctx.beginPath();
-      ctx.moveTo(-4, 8);
-      ctx.lineTo(-4 + Math.sin(-legAngle) * 12, 20);
-      ctx.stroke();
-
-      // Front leg
-      ctx.beginPath();
-      ctx.moveTo(4, 8);
-      ctx.lineTo(4 + Math.sin(legAngle) * 12, 20);
-      ctx.stroke();
-
-      // Red Sneakers
+      // Sneakers
       ctx.fillStyle = '#ef4444';
-      ctx.fillRect(-8 + Math.sin(-legAngle) * 12, 18, 10, 6);
-      ctx.fillRect(0 + Math.sin(legAngle) * 12, 18, 10, 6);
+      ctx.fillRect(-10, 14, 10, 6);
+      ctx.fillRect(2, 14, 10, 6);
 
-      // --- Torso & Yellow Backpack ---
-      ctx.fillStyle = '#f59e0b'; // Backpack
-      ctx.beginPath();
-      ctx.roundRect(-22, -12, 12, 22, 4);
-      ctx.fill();
+      // Backpack & Hoodie
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath(); ctx.roundRect(-22, -14, 12, 22, 4); ctx.fill();
 
-      ctx.fillStyle = '#2563eb'; // Blue Hoodie
-      ctx.beginPath();
-      ctx.roundRect(-12, -10, 22, 22, 6);
-      ctx.fill();
+      ctx.fillStyle = '#2563eb';
+      ctx.beginPath(); ctx.roundRect(-12, -12, 24, 22, 6); ctx.fill();
 
-      // Zipper line
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(-1, -10); ctx.lineTo(-1, 12); ctx.stroke();
-
-      // Arm swing
-      ctx.strokeStyle = '#2563eb';
-      ctx.lineWidth = 5;
-      ctx.beginPath(); ctx.moveTo(0, -4); ctx.lineTo(12 * Math.cos(legAngle), 4); ctx.stroke();
-
-      // --- SD Head & Brown Hair ---
-      const headY = -26;
-
-      ctx.fillStyle = '#fed7aa'; // Cute Skin Tone
+      // Head
+      const headY = -28;
+      ctx.fillStyle = '#fed7aa';
       ctx.beginPath(); ctx.arc(0, headY, 20, 0, Math.PI * 2); ctx.fill();
 
       // Eyes
       ctx.fillStyle = '#0f172a';
-      ctx.beginPath(); ctx.ellipse(6, headY - 1, 3.5, 5, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(5, headY - 1, 3.5, 5, 0, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#ffffff';
-      ctx.beginPath(); ctx.arc(7.5, headY - 3, 1.5, 0, Math.PI * 2); ctx.fill();
-
-      // Blushing cheeks
-      ctx.fillStyle = 'rgba(244, 63, 94, 0.4)';
-      ctx.beginPath(); ctx.arc(8, headY + 5, 4, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(6.5, headY - 3, 1.5, 0, Math.PI * 2); ctx.fill();
 
       // Smile
-      ctx.strokeStyle = '#9a3412';
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(4, headY + 5, 4, 0.1, Math.PI * 0.8); ctx.stroke();
+      ctx.strokeStyle = '#9a3412'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(2, headY + 5, 4, 0.1, Math.PI * 0.8); ctx.stroke();
 
       // Brown Hair
-      ctx.fillStyle = '#6f3c1b';
-      ctx.strokeStyle = '#451a03';
-      ctx.lineWidth = 1.5;
-
+      ctx.fillStyle = '#6f3c1b'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(0, headY - 2, 22, Math.PI * 0.7, Math.PI * 1.95); ctx.fill();
       ctx.beginPath();
-      ctx.arc(-2, headY - 2, 22, Math.PI * 0.7, Math.PI * 1.95);
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.moveTo(-20, headY - 6);
-      ctx.quadraticCurveTo(-8, headY - 26, 4, headY - 18);
+      ctx.moveTo(-18, headY - 6);
+      ctx.quadraticCurveTo(-6, headY - 26, 4, headY - 18);
       ctx.quadraticCurveTo(14, headY - 28, 22, headY - 10);
       ctx.quadraticCurveTo(12, headY - 10, 4, headY - 12);
-      ctx.quadraticCurveTo(-6, headY - 10, -20, headY - 6);
-      ctx.closePath();
-      ctx.fill(); ctx.stroke();
+      ctx.quadraticCurveTo(-6, headY - 10, -18, headY - 6);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
 
       ctx.restore();
     }
@@ -852,8 +812,7 @@
 
       if (speaker === 'student') {
         drawBrownHairSDStudent(pCtx, 64, 75, 0);
-      } else if (speaker === 'professor') {
-        // Professor Portrait
+      } else {
         pCtx.save();
         pCtx.translate(64, 75);
         pCtx.fillStyle = '#ffedd5';
@@ -862,169 +821,127 @@
         pCtx.strokeRect(-16, -26, 12, 10); pCtx.strokeRect(4, -26, 12, 10);
         pCtx.beginPath(); pCtx.moveTo(-4, -21); pCtx.lineTo(4, -21); pCtx.stroke();
         pCtx.fillStyle = '#334155'; pCtx.fillRect(-22, -2, 44, 35);
-        pCtx.fillStyle = '#dc2626';
-        pCtx.beginPath(); pCtx.moveTo(-4, -2); pCtx.lineTo(4, -2); pCtx.lineTo(0, 18); pCtx.closePath(); pCtx.fill();
-        pCtx.fillStyle = '#94a3b8';
-        pCtx.beginPath(); pCtx.arc(0, -28, 24, Math.PI * 0.8, Math.PI * 2.2); pCtx.fill();
-        pCtx.restore();
-      } else if (speaker === 'chancellor') {
-        // Chancellor / Final Boss Portrait
-        pCtx.save();
-        pCtx.translate(64, 75);
-        pCtx.fillStyle = '#fde68a';
-        pCtx.beginPath(); pCtx.arc(0, -20, 22, 0, Math.PI * 2); pCtx.fill();
-        pCtx.fillStyle = '#78350f'; // Crown
-        pCtx.beginPath(); pCtx.moveTo(-16, -38); pCtx.lineTo(-8, -50); pCtx.lineTo(0, -38); pCtx.lineTo(8, -50); pCtx.lineTo(16, -38); pCtx.closePath(); pCtx.fill();
-        pCtx.fillStyle = '#991b1b'; pCtx.fillRect(-24, -2, 48, 35);
         pCtx.restore();
       }
     }
 
-    const OBSTACLE_TYPES = [
+    const MINUS_NOTES = [
       { text: "과제 💥", color: "#ef4444", border: "#991b1b" },
       { text: "출석 📋", color: "#f97316", border: "#c2410c" },
-      { text: "할 일 📝", color: "#dc2626", border: "#7f1d1d" },
       { text: "퀴즈 📄", color: "#ea580c", border: "#7c2d12" },
-      { text: "야근 🌙", color: "#e11d48", border: "#881337" },
       { text: "팀플 🔥", color: "#b91c1c", border: "#450a0a" },
+      { text: "야근 🌙", color: "#e11d48", border: "#881337" },
+      { text: "학점F ☠️", color: "#dc2626", border: "#7f1d1d" }
     ];
 
-    const GREEN_ITEM_TYPES = [
-      { text: "동아리 🎉", color: "#22c55e", border: "#15803d", heal: 12, score: 300 },
-      { text: "놀기 🎮", color: "#10b981", border: "#047857", heal: 14, score: 350 },
-      { text: "휴식 ☕", color: "#06b6d4", border: "#0e7490", heal: 15, score: 400 },
-      { text: "조퇴 🏃", color: "#14b8a6", border: "#0f766e", heal: 15, score: 450 }
+    const PLUS_NOTES = [
+      { text: "동아리 🎉", color: "#22c55e", border: "#15803d", heal: 16, score: 400 },
+      { text: "놀기 🎮", color: "#10b981", border: "#047857", heal: 18, score: 450 },
+      { text: "휴식 ☕", color: "#06b6d4", border: "#0e7490", heal: 20, score: 500 },
+      { text: "종강 🏖️", color: "#14b8a6", border: "#0f766e", heal: 25, score: 600 }
     ];
 
-    let entities = [];
+    let notes = [];
+    let floatingTexts = [];
     let particles = [];
-    let spawnTimer = 0;
     let frameTick = 0;
-    let bgScroll = 0;
 
-    function drawBackground() {
-      const w = canvas.width;
-      const h = canvas.height;
+    function spawnNote() {
       const stgCfg = STAGE_CONFIG[gameState.currentStage];
-
-      if (stgCfg.bgType === 'classroom') {
-        const sky = ctx.createLinearGradient(0, 0, 0, h);
-        sky.addColorStop(0, '#1e1b4b'); sky.addColorStop(1, '#312e81');
-        ctx.fillStyle = sky; ctx.fillRect(0, 0, w, h);
-
-        // Classroom Chalkboard
-        ctx.fillStyle = '#064e3b';
-        ctx.fillRect(w * 0.1, h * 0.08, w * 0.8, h * 0.22);
-        ctx.strokeStyle = '#78350f'; ctx.lineWidth = 6;
-        ctx.strokeRect(w * 0.1, h * 0.08, w * 0.8, h * 0.22);
-        ctx.fillStyle = '#a7f3d0'; ctx.font = '16px "Noto Sans KR"';
-        ctx.fillText("1교시: 칼퇴 수치 100% 달성 시 즉시 퇴실 가능!", w * 0.15, h * 0.2);
-
-      } else if (stgCfg.bgType === 'laboratory') {
-        const sky = ctx.createLinearGradient(0, 0, 0, h);
-        sky.addColorStop(0, '#0f172a'); sky.addColorStop(1, '#1e293b');
-        ctx.fillStyle = sky; ctx.fillRect(0, 0, w, h);
-
-        // Laboratory Flask Shelf Silhouette
-        ctx.fillStyle = 'rgba(56, 189, 248, 0.15)';
-        ctx.fillRect(0, h * 0.1, w, h * 0.2);
-      } else {
-        // Maingate Campus Sunset
-        const sky = ctx.createLinearGradient(0, 0, 0, h);
-        sky.addColorStop(0, '#090d16'); sky.addColorStop(0.5, '#4c1d95'); sky.addColorStop(1, '#831843');
-        ctx.fillStyle = sky; ctx.fillRect(0, 0, w, h);
-
-        // Campus Gate Pillars
-        ctx.fillStyle = 'rgba(30, 27, 75, 0.6)';
-        for (let i = -1; i < 6; i++) {
-          const x = (i * 220) - ((bgScroll * 0.3) % 220);
-          ctx.fillRect(x, h * 0.12, 40, h * 0.25);
-        }
-      }
-
-      // 3 Lanes Running Track
-      ctx.fillStyle = '#0f172a';
-      ctx.fillRect(0, h * 0.15, w, h * 0.75);
-
-      ctx.strokeStyle = '#334155';
-      ctx.lineWidth = 4;
-      ctx.setLineDash([26, 20]);
-      ctx.lineDashOffset = -bgScroll * 1.5;
-
-      ctx.beginPath();
-      ctx.moveTo(0, h * 0.38); ctx.lineTo(w, h * 0.38);
-      ctx.moveTo(0, h * 0.65); ctx.lineTo(w, h * 0.65);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-
-    function spawnEntity() {
-      const stgCfg = STAGE_CONFIG[gameState.currentStage];
-      const isGreen = Math.random() < stgCfg.greenRate;
-      const typeList = isGreen ? GREEN_ITEM_TYPES : OBSTACLE_TYPES;
+      const isPlus = Math.random() < stgCfg.greenRate;
+      const isHold = Math.random() < stgCfg.holdRate;
+      const typeList = isPlus ? PLUS_NOTES : MINUS_NOTES;
       const template = typeList[Math.floor(Math.random() * typeList.length)];
-      
-      const laneIndex = Math.floor(Math.random() * 3);
-      const laneY = canvas.height * CONFIG.lanes[laneIndex];
 
-      entities.push({
+      const holdLen = isHold ? Math.floor(Math.random() * 120 + 160) : 0;
+
+      notes.push({
         ...template,
-        x: canvas.width + 60,
-        y: laneY,
-        lane: laneIndex,
-        width: 155,
-        height: 52,
+        y: -60 - holdLen,
         speed: stgCfg.speed,
-        isGreen: isGreen
+        isPlus: isPlus,
+        isHold: isHold,
+        holdLength: holdLen,
+        isHolding: false,
+        headHit: false,
+        completed: false,
+        width: 170,
+        height: 54
       });
     }
 
-    function drawFlyingBadge(e) {
+    function drawNoteBadge(n) {
+      const x = canvas.width / 2;
+
       ctx.save();
-      ctx.translate(e.x, e.y);
 
-      ctx.shadowColor = e.color;
-      ctx.shadowBlur = 12;
+      // If Hold Note: Render Hold Body Line connecting Tail to Head
+      if (n.isHold) {
+        const headY = n.y + n.holdLength;
+        const tailY = n.y;
 
-      ctx.fillStyle = e.color;
-      ctx.strokeStyle = e.border;
-      ctx.lineWidth = 3;
+        // Long Note Body Glow
+        ctx.fillStyle = n.isHolding ? 'rgba(250, 204, 21, 0.55)' : `${n.color}55`;
+        ctx.strokeStyle = n.border;
+        ctx.lineWidth = 4;
+
+        ctx.fillRect(x - 30, tailY, 60, n.holdLength);
+        ctx.strokeRect(x - 30, tailY, 60, n.holdLength);
+
+        // Render Hold Tail Badge
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath(); ctx.arc(x, tailY, 16, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = n.color; ctx.lineWidth = 3; ctx.stroke();
+        ctx.font = '900 12px "Black Han Sans", sans-serif';
+        ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('END', x, tailY);
+
+        // Render Head Badge at headY
+        ctx.translate(x, headY);
+      } else {
+        ctx.translate(x, n.y);
+      }
+
+      // Render Main Badge Head
+      ctx.shadowColor = n.color; ctx.shadowBlur = 18;
+      ctx.fillStyle = n.color; ctx.strokeStyle = n.border; ctx.lineWidth = 4;
       ctx.beginPath();
-      ctx.roundRect(-e.width / 2, -e.height / 2, e.width, e.height, 16);
+      ctx.roundRect(-n.width / 2, -n.height / 2, n.width, n.height, 18);
       ctx.fill(); ctx.stroke();
-
       ctx.shadowBlur = 0;
 
-      // Large High-contrast 28px Font
-      ctx.font = '900 28px "Noto Sans KR", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-
-      ctx.strokeStyle = '#000000';
-      ctx.lineWidth = 5;
-      ctx.strokeText(e.text, 0, 1);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText(e.text, 0, 1);
+      // Enlarged High-Contrast Text (30px)
+      ctx.font = '900 30px "Noto Sans KR", sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.strokeStyle = '#000000'; ctx.lineWidth = 6;
+      ctx.strokeText(n.isHold ? `${n.text} ⚡` : n.text, 0, 1);
+      ctx.fillStyle = '#ffffff'; ctx.fillText(n.isHold ? `${n.text} ⚡` : n.text, 0, 1);
 
       ctx.restore();
     }
 
-    function createBurst(x, y, color) {
-      for (let i = 0; i < 15; i++) {
+    function addFloatingText(x, y, text, color) {
+      floatingTexts.push({ x, y, text, color, alpha: 1.0, vy: -3.2 });
+    }
+
+    function spawnSparks(x, y, color) {
+      for (let i = 0; i < 8; i++) {
         particles.push({
-          x: x, y: y,
-          vx: (Math.random() - 0.5) * 10, vy: (Math.random() - 0.5) * 10,
-          radius: Math.random() * 5 + 3,
-          color: color, alpha: 1.0, life: 22
+          x: x + (Math.random() - 0.5) * 40,
+          y: y + (Math.random() - 0.5) * 10,
+          vx: (Math.random() - 0.5) * 7,
+          vy: -Math.random() * 5 - 2,
+          radius: Math.random() * 4 + 2,
+          color: color,
+          alpha: 1.0
         });
       }
     }
 
-    function updateAndDrawParticles() {
+    function updateParticles() {
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
-        p.x += p.vx; p.y += p.vy;
-        p.alpha -= 1 / p.life;
+        p.x += p.vx; p.y += p.vy; p.alpha -= 0.04;
         if (p.alpha <= 0) { particles.splice(i, 1); continue; }
 
         ctx.save();
@@ -1035,15 +952,133 @@
       }
     }
 
+    function updateFloatingTexts() {
+      for (let i = floatingTexts.length - 1; i >= 0; i--) {
+        const ft = floatingTexts[i];
+        ft.y += ft.vy; ft.alpha -= 0.024;
+        if (ft.alpha <= 0) { floatingTexts.splice(i, 1); continue; }
+
+        ctx.save();
+        ctx.globalAlpha = ft.alpha;
+        ctx.font = '900 26px "Black Han Sans", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.strokeStyle = '#000000'; ctx.lineWidth = 5;
+        ctx.strokeText(ft.text, ft.x, ft.y);
+        ctx.fillStyle = ft.color;
+        ctx.fillText(ft.text, ft.x, ft.y);
+        ctx.restore();
+      }
+    }
+
+    function drawSingleLaneTrack() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const trackW = Math.min(280, w * 0.55);
+      const trackX = (w - trackW) / 2;
+
+      // Dark Campus Runway Background
+      ctx.fillStyle = '#0a0e1a';
+      ctx.fillRect(0, 0, w, h);
+
+      // Single Track Background
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.78)';
+      ctx.fillRect(trackX, 0, trackW, h);
+
+      // Glowing Runway Side Borders
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.45)'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(trackX, 0); ctx.lineTo(trackX, h); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(trackX + trackW, 0); ctx.lineTo(trackX + trackW, h); ctx.stroke();
+
+      // Track Center Dashed Guideline
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)'; ctx.lineWidth = 2; ctx.setLineDash([12, 12]);
+      ctx.beginPath(); ctx.moveTo(w / 2, 0); ctx.lineTo(w / 2, h); ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Target Judgment Line at Bottom (Y = h - 90)
+      const judgeY = h - 90;
+      ctx.strokeStyle = gameState.isHoldingKey ? '#22c55e' : '#f59e0b';
+      ctx.lineWidth = gameState.isHoldingKey ? 7 : 5;
+      ctx.shadowColor = gameState.isHoldingKey ? '#22c55e' : '#f59e0b';
+      ctx.shadowBlur = 18;
+      ctx.beginPath(); ctx.moveTo(trackX - 10, judgeY); ctx.lineTo(trackX + trackW + 10, judgeY); ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+
+    function triggerHitSpacebar() {
+      if (!gameState.isPlaying || gameState.isPaused) return;
+
+      gameState.playerBounceTick = 8;
+      const judgeY = canvas.height - 90;
+      const centerX = canvas.width / 2;
+      let hitFound = false;
+
+      for (let i = notes.length - 1; i >= 0; i--) {
+        const n = notes[i];
+        const currentHeadY = n.isHold ? (n.y + n.holdLength) : n.y;
+        const dist = Math.abs(currentHeadY - judgeY);
+
+        if (dist < 70) {
+          hitFound = true;
+
+          if (n.isHold) {
+            // Start Holding
+            n.isHolding = true;
+            n.headHit = true;
+            playSFX('hit_perfect');
+            gameState.combo++;
+            gameState.score += 300;
+            spawnSparks(centerX, judgeY, '#f59e0b');
+            addFloatingText(centerX, judgeY - 30, 'HOLD START! ⚡', '#f59e0b');
+          } else {
+            // Single Tap Note Hit
+            let rating = "PERFECT!";
+            let scoreVal = 500;
+            let ratingColor = "#f59e0b";
+
+            if (dist < 32) {
+              rating = "PERFECT!"; scoreVal = 600; ratingColor = "#22c55e";
+              gameState.perfectHits++;
+              playSFX('hit_perfect');
+            } else {
+              rating = "GREAT!"; scoreVal = 350; ratingColor = "#38bdf8";
+              playSFX('hit_great');
+            }
+
+            gameState.combo++;
+            gameState.score += scoreVal;
+            spawnSparks(centerX, judgeY, ratingColor);
+
+            if (n.isPlus) {
+              gameState.gauge = Math.min(CONFIG.maxGauge, gameState.gauge + n.heal);
+              addFloatingText(centerX, judgeY - 30, `${rating} +${n.heal}% 획득!`, ratingColor);
+            } else {
+              gameState.gauge = Math.min(CONFIG.maxGauge, gameState.gauge + 4);
+              addFloatingText(centerX, judgeY - 30, `${rating} 과제 방어!`, ratingColor);
+            }
+
+            const comboBadge = document.getElementById('hud-combo-badge');
+            comboBadge.classList.remove('hidden');
+            document.getElementById('hud-combo-count').innerText = gameState.combo;
+
+            notes.splice(i, 1);
+          }
+          break;
+        }
+      }
+
+      if (!hitFound) {
+        playSFX('step');
+      }
+    }
+
     function updateGameLogic() {
       if (!gameState.isPlaying || gameState.isPaused) return;
 
       const stgCfg = STAGE_CONFIG[gameState.currentStage];
       frameTick++;
       gameState.gameTime += 1 / 60;
-      bgScroll += stgCfg.speed;
 
-      // Automatic Leaving Work Gauge Elevation
+      // Automatic slow gauge increase
       gameState.gauge += stgCfg.autoGaugeSpeed * 0.1;
       if (gameState.gauge >= CONFIG.maxGauge) {
         gameState.gauge = CONFIG.maxGauge;
@@ -1051,69 +1086,92 @@
         return;
       }
 
-      gameState.score += Math.round(1 * gameState.currentStage);
       document.getElementById('hud-gauge-text').innerText = `${Math.floor(gameState.gauge)}%`;
       document.getElementById('hud-gauge-bar').style.width = `${gameState.gauge}%`;
       document.getElementById('hud-score').innerText = gameState.score.toLocaleString();
-
-      const playerX = 110;
-      gameState.targetY = canvas.height * CONFIG.lanes[gameState.currentLane];
-      gameState.playerY += (gameState.targetY - gameState.playerY) * 0.25;
-
-      spawnTimer++;
-      if (spawnTimer >= stgCfg.spawnInterval) {
-        spawnEntity();
-        spawnTimer = 0;
-      }
+      document.getElementById('hud-bpm-text').innerText = stgCfg.bpm;
 
       if (gameState.screenShake > 0) gameState.screenShake *= 0.88;
 
-      // Entities & Collisions
-      for (let i = entities.length - 1; i >= 0; i--) {
-        const e = entities[i];
-        e.x -= e.speed;
+      const judgeY = canvas.height - 90;
+      const centerX = canvas.width / 2;
 
-        const dx = Math.abs(e.x - playerX);
-        const dy = Math.abs(e.y - gameState.playerY);
+      // Update Notes Motion & Hold Ticks
+      for (let i = notes.length - 1; i >= 0; i--) {
+        const n = notes[i];
+        n.y += n.speed;
 
-        if (dx < e.width / 2 + 18 && dy < e.height / 2 + 18) {
-          if (e.isGreen) {
-            gameState.gauge = Math.min(CONFIG.maxGauge, gameState.gauge + e.heal);
-            gameState.score += e.score;
-            playSFX('item');
-            createBurst(e.x, e.y, '#22c55e');
-          } else {
+        const currentHeadY = n.isHold ? (n.y + n.holdLength) : n.y;
+        const tailY = n.y;
+
+        // Process Continuous Hold Notes
+        if (n.isHold && n.isHolding) {
+          if (gameState.isHoldingKey && tailY < judgeY) {
+            // Holding in progress
+            if (frameTick % 6 === 0) {
+              gameState.score += 80;
+              gameState.gauge = Math.min(CONFIG.maxGauge, gameState.gauge + 0.8);
+              playSFX('hold_tick');
+              spawnSparks(centerX, judgeY, '#22c55e');
+            }
+          } else if (tailY >= judgeY) {
+            // Completed Hold Note
+            playSFX('hit_perfect');
+            gameState.perfectHits++;
+            gameState.score += 1000;
+            gameState.gauge = Math.min(CONFIG.maxGauge, gameState.gauge + 10);
+            addFloatingText(centerX, judgeY - 30, 'HOLD COMPLETE! 🎉', '#22c55e');
+            spawnSparks(centerX, judgeY, '#22c55e');
+            notes.splice(i, 1);
+            continue;
+          } else if (!gameState.isHoldingKey) {
+            // Released key too early
+            n.isHolding = false;
+            gameState.combo = 0;
+            addFloatingText(centerX, judgeY - 30, 'HOLD DROPPED! ⚠️', '#ef4444');
+          }
+        }
+
+        // Miss Detection for passed notes
+        if (!n.isHolding && currentHeadY > judgeY + 55) {
+          if (!n.isPlus) {
+            // Undeflected obstacle hit
             gameState.gauge = Math.max(0, gameState.gauge - stgCfg.obstacleDamage);
+            gameState.combo = 0;
             gameState.screenShake = 16;
-            playSFX('hit');
-            createBurst(e.x, e.y, '#ef4444');
+            document.getElementById('hud-combo-badge').classList.add('hidden');
+            playSFX('miss');
+            addFloatingText(centerX, judgeY, `MISS -${stgCfg.obstacleDamage}% 피로!`, '#ef4444');
 
             if (gameState.gauge <= 0) {
               triggerStageEnd(false);
               return;
             }
           }
-          entities.splice(i, 1);
-          continue;
+          notes.splice(i, 1);
         }
-
-        if (e.x < -100) entities.splice(i, 1);
       }
     }
 
     function render() {
       ctx.save();
       if (gameState.screenShake > 0.5) {
-        const shakeX = (Math.random() - 0.5) * gameState.screenShake;
-        const shakeY = (Math.random() - 0.5) * gameState.screenShake;
-        ctx.translate(shakeX, shakeY);
+        ctx.translate((Math.random() - 0.5) * gameState.screenShake, (Math.random() - 0.5) * gameState.screenShake);
       }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawBackground();
-      entities.forEach(drawFlyingBadge);
-      drawBrownHairSDStudent(ctx, 110, gameState.playerY, frameTick);
-      updateAndDrawParticles();
+      drawSingleLaneTrack();
+
+      // Render falling notes and particles
+      notes.forEach(drawNoteBadge);
+      updateParticles();
+
+      // Render Player SD Student at Judgment Position
+      const judgeY = canvas.height - 90;
+      const centerX = canvas.width / 2;
+      drawBrownHairSDStudent(ctx, centerX, judgeY, frameTick);
+
+      updateFloatingTexts();
       ctx.restore();
 
       requestAnimationFrame(() => {
@@ -1124,36 +1182,48 @@
 
     const STORY_SCRIPTS = {
       stg1_intro: [
-        { speaker: 'student', title: '김민첩 (대학생)', text: '"1교시 대형 강의실 출석만 찍고 민첩하게 탈출하려 했는데, 문이 왜 잠겨있지?!"' },
-        { speaker: 'professor', title: '👨‍🏫 1교시 교수님', text: '"껄껄! 자네가 나갈 수 있을까? 출석 기습 체크와 과제 팝퀴즈 폭탄 세례를 받아라!"' },
-        { speaker: 'student', title: '김민첩 (대학생)', text: '"민첩하지 않으면 F학점이다! 신속하게 과제를 회피하고 100% 칼퇴를 사수한다!"' }
+        { speaker: 'student', title: '김민첩 (대학생)', text: '"상큼한 1교시 아침 수업! 리듬 비트에 맞춰 단타와 롱노트를 번갈아 막아내자!"' },
+        { speaker: 'professor', title: '👨‍🏫 1교시 교수님', text: '"노트가 내려올 때 스페이스바를 누르고, 롱노트는 길게 누르고 있어라!"' }
       ],
       stg1_outro: [
-        { speaker: 'student', title: '김민첩 (대학생)', text: '"후... 1교시 교수님의 퀴즈 융단폭격을 전부 피해냈다! 드디어 칼퇴인가?"' },
-        { speaker: 'professor', title: '👨‍🏫 랩실 지도교수님', text: '"어디 가나, 학부연구생 노예군? 자네의 주말은 대학원 연구실 시약 정리와 논문 번역이다!"' }
+        { speaker: 'student', title: '김민첩 (대학생)', text: '"1교시 과제 폭풍을 무사히 퇴치했다!"' }
       ],
       stg2_intro: [
-        { speaker: 'student', title: '김민첩 (대학생)', text: '"으악! 노예 계약서를 들고 랩실 교수님이 쫓아온다! 2교시 연구실 탈출 작전 시작!"' }
+        { speaker: 'student', title: '김민첩 (대학생)', text: '"2교시 랩실로 소환당했다! 랩실 노예 추노곡 비트에 맞춰 퀴즈와 보고서를 물리치자!"' }
       ],
       stg2_outro: [
-        { speaker: 'student', title: '김민첩 (대학생)', text: '"랩실 노예 소환을 뚫었다! 이제 학교 정문만 지나면 완전히 집으로 간다!"' },
-        { speaker: 'chancellor', title: '👑 총장님 (최종보스)', text: '"멈추어라! 졸업 논문 수치 99% 부족! 과제 메테오 스트라이크를 맞아라!"' }
+        { speaker: 'student', title: '김민첩 (대학생)', text: '"랩실 보고서와 불시 퀴즈 정복 완료!"' }
       ],
       stg3_intro: [
-        { speaker: 'student', title: '김민첩 (대학생)', text: '"총장님까지 직접 등판하다니... 하지만 나의 칼퇴 열정을 막을 순 없다! 최종전 돌입!"' }
+        { speaker: 'student', title: '김민첩 (대학생)', text: '"3교시 동아리방이다! 신나는 펑키 댄스 비트에 맞춰 동아리 이벤트를 즐기자!"' }
       ],
       stg3_outro: [
-        { speaker: 'chancellor', title: '👑 총장님', text: '"말도 안 돼... 내 졸업 논문 유성우를 전부 칼같이 비켜서다니... 패배를 인정한다!"' },
-        { speaker: 'student', title: '김민첩 (대학생)', text: '"이것이 바로 대학생의 칼퇴 민첩력이다! 안녕히 계세요 여러분, 저는 칼퇴합니다!"' }
+        { speaker: 'student', title: '김민첩 (대학생)', text: '"동아리 펑키 리듬 타격 대성공!"' }
+      ],
+      stg4_intro: [
+        { speaker: 'student', title: '김민첩 (대학생)', text: '"4교시 대학 축제 하이텐션! 170 BPM의 초고속 비트가 몰아친다!"' }
+      ],
+      stg4_outro: [
+        { speaker: 'student', title: '김민첩 (대학생)', text: '"축제 하이텐션 무대를 완벽하게 라이브 완주했다!"' }
+      ],
+      stg5_intro: [
+        { speaker: 'student', title: '김민첩 (대학생)', text: '"5교시 기말고사 & 팀플 대혼란! EDM 트랩 비트와 함께 롱노트 폭탄이 쏟아진다!"' }
+      ],
+      stg5_outro: [
+        { speaker: 'student', title: '김민첩 (대학생)', text: '"무임승차 팀원들과 기말고사 폭탄을 모두 격파했다!"' }
+      ],
+      stg6_intro: [
+        { speaker: 'student', title: '김민첩 (대학생)', text: '"마지막 정문이다! 교수님의 200 BPM 유로비트 대학원 스카우트 마법을 막아내자!"' },
+        { speaker: 'professor', title: '👑 총장님 & 교수님', text: '"너... 내 대학원 연구생이 되어라! 롱노트 폭풍 비트를 견뎌봐라!"' }
+      ],
+      stg6_outro: [
+        { speaker: 'student', title: '김민첩 (대학생)', text: '"대학원 스카우트 마법을 격파했다! 안녕히 계세요 여러분, 저는 칼퇴합니다!"' }
       ]
     };
 
     function playStorySequence(key, onComplete) {
       const script = STORY_SCRIPTS[key];
-      if (!script || script.length === 0) {
-        if (onComplete) onComplete();
-        return;
-      }
+      if (!script || script.length === 0) { if (onComplete) onComplete(); return; }
 
       gameState.storyIndex = 0;
       document.getElementById('modal-story').classList.remove('hidden');
@@ -1166,7 +1236,6 @@
         }
 
         const step = script[gameState.storyIndex];
-        const speakerName = step.speaker === 'student' ? gameState.playerName : step.title;
         document.getElementById('story-speaker-name').innerText = step.title.replace('김민첩', gameState.playerName);
         document.getElementById('story-speaker-tag').innerText = step.speaker === 'student' ? gameState.playerName : '상대';
         document.getElementById('story-text-content').innerText = step.text.replace('김민첩', gameState.playerName);
@@ -1176,7 +1245,7 @@
       }
 
       document.getElementById('btn-story-next').onclick = () => {
-        playSFX('jump');
+        playSFX('step');
         gameState.storyIndex++;
         renderStep();
       };
@@ -1189,35 +1258,40 @@
       const stgCfg = STAGE_CONFIG[stg];
 
       document.getElementById('hud-stage-label').innerText = `STAGE ${stg}`;
-      document.getElementById('hud-difficulty-tag').innerText = stgCfg.difficultyText;
+      document.getElementById('hud-bpm-text').innerText = stgCfg.bpm;
 
       playStorySequence(`stg${stg}_intro`, () => {
         resetStageVars();
         gameState.isPlaying = true;
         document.getElementById('hud-layer').classList.remove('hidden');
         document.getElementById('btn-pause-toggle').classList.remove('hidden');
-        startBGM();
+
+        if (audioCtx) {
+          nextBeatTime = audioCtx.currentTime + 0.1;
+          beatStep = 0;
+        }
+        rhythmSequencerLoop();
       });
     }
 
     function resetStageVars() {
       gameState.gauge = 20;
+      gameState.score = 0;
+      gameState.combo = 0;
+      gameState.perfectHits = 0;
       gameState.gameTime = 0;
-      gameState.currentLane = 1;
-      gameState.playerY = canvas.height * CONFIG.lanes[1];
-      entities = [];
+      gameState.isHoldingKey = false;
+      notes = [];
+      floatingTexts = [];
       particles = [];
-      spawnTimer = 0;
     }
 
     function triggerStageEnd(isVictory) {
       gameState.isPlaying = false;
-      stopBGM();
       document.getElementById('hud-layer').classList.add('hidden');
       document.getElementById('btn-pause-toggle').classList.add('hidden');
 
-      const isNewRecord = gameState.score > gameState.highScore;
-      if (isNewRecord) {
+      if (gameState.score > gameState.highScore) {
         gameState.highScore = gameState.score;
         saveData();
       }
@@ -1230,11 +1304,11 @@
 
       document.getElementById('result-player-name').innerText = gameState.playerName;
       document.getElementById('result-final-score').innerText = `${gameState.score.toLocaleString()}점`;
-      document.getElementById('result-final-gauge').innerText = `${Math.floor(gameState.gauge)}%`;
+      document.getElementById('result-perfect-count').innerText = `${gameState.perfectHits} PERFECTS`;
 
       if (isVictory) {
-        playSFX('win');
-        if (gameState.currentStage < 3 && gameState.unlockedStage <= gameState.currentStage) {
+        playSFX('hit_perfect');
+        if (gameState.currentStage < 6 && gameState.unlockedStage <= gameState.currentStage) {
           gameState.unlockedStage = gameState.currentStage + 1;
           saveData();
         }
@@ -1244,9 +1318,9 @@
           icon.className = "fa-solid fa-trophy text-4xl";
           title.innerText = `STAGE ${gameState.currentStage} 클리어! 🎉`;
           title.className = "text-2xl md:text-3xl font-black font-title mb-1 text-emerald-400";
-          subtitle.innerText = `${STAGE_CONFIG[gameState.currentStage].name} 탈출에 성공했습니다!`;
+          subtitle.innerText = `${STAGE_CONFIG[gameState.currentStage].name} 탈출 성공!`;
 
-          if (gameState.currentStage < 3) {
+          if (gameState.currentStage < 6) {
             actionBtn.innerText = "다음 스테이지 ▶";
             actionBtn.onclick = () => {
               gameState.currentStage++;
@@ -1254,7 +1328,7 @@
               launchCurrentStage();
             };
           } else {
-            actionBtn.innerText = "칼퇴 대성공! (메인으로)";
+            actionBtn.innerText = "칼퇴 마스터 엔딩! (메인으로)";
             actionBtn.onclick = () => {
               document.getElementById('modal-result').classList.add('hidden');
               document.getElementById('modal-main-menu').classList.remove('hidden');
@@ -1263,12 +1337,12 @@
           document.getElementById('modal-result').classList.remove('hidden');
         });
       } else {
-        playSFX('hit');
+        playSFX('miss');
         cardBg.className = "w-20 h-20 rounded-3xl flex items-center justify-center mb-4 shadow-xl bg-red-500 text-slate-950 glow-red";
         icon.className = "fa-solid fa-skull-crossbones text-4xl";
         title.innerText = "민첩함 부족! (실패) 😭";
         title.className = "text-2xl md:text-3xl font-black font-title mb-1 text-red-400";
-        subtitle.innerText = "과제 폭탄에 직격당해 칼퇴에 실패하였습니다!";
+        subtitle.innerText = "과제와 과로 폭탄으로 칼퇴에 실패했습니다!";
 
         actionBtn.innerText = "다시 도전 🔄";
         actionBtn.onclick = () => {
@@ -1279,64 +1353,34 @@
       }
     }
 
-    function moveLane(dir) {
-      if (!gameState.isPlaying || gameState.isPaused) return;
-      if (dir === 'UP' && gameState.currentLane > 0) {
-        gameState.currentLane--;
-        playSFX('jump');
-      } else if (dir === 'DOWN' && gameState.currentLane < 2) {
-        gameState.currentLane++;
-        playSFX('jump');
-      }
-    }
-
-    let isRebindingUp = false;
-    let isRebindingDown = false;
+    let isRebindingHit = false;
 
     window.addEventListener('keydown', (e) => {
-      if (isRebindingUp) {
-        gameState.keyUp = e.key;
-        isRebindingUp = false;
-        document.getElementById('btn-rebind-up').classList.remove('ring-2', 'ring-amber-400');
-        updateUIHeaderAndInfo();
-        showToast(`위로 이동 키가 [ ${e.key} ] 로 변경되었습니다.`);
-        return;
-      }
-      if (isRebindingDown) {
-        gameState.keyDown = e.key;
-        isRebindingDown = false;
-        document.getElementById('btn-rebind-down').classList.remove('ring-2', 'ring-amber-400');
-        updateUIHeaderAndInfo();
-        showToast(`아래로 이동 키가 [ ${e.key} ] 로 변경되었습니다.`);
-        return;
+      if (isRebindingHit) {
+        gameState.keyHit = e.key; isRebindingHit = false;
+        updateUIHeaderAndInfo(); showToast(`타격 키가 [ ${e.key === ' ' ? 'Space' : e.key} ] 로 변경되었습니다.`); return;
       }
 
-      if (e.key === gameState.keyUp || e.key === 'w' || e.key === 'W') {
-        moveLane('UP');
-      } else if (e.key === gameState.keyDown || e.key === 's' || e.key === 'S') {
-        moveLane('DOWN');
+      if ((e.key === gameState.keyHit || e.code === 'Space') && !e.repeat) {
+        gameState.isHoldingKey = true;
+        triggerHitSpacebar();
       } else if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
         togglePause();
       }
     });
 
-    document.getElementById('btn-rebind-up').addEventListener('click', () => {
-      isRebindingUp = true;
-      isRebindingDown = false;
-      document.getElementById('btn-rebind-up').classList.add('ring-2', 'ring-amber-400');
-      showToast("변경할 위로 이동 키를 감지하는 중...");
+    window.addEventListener('keyup', (e) => {
+      if (e.key === gameState.keyHit || e.code === 'Space') {
+        gameState.isHoldingKey = false;
+      }
     });
 
-    document.getElementById('btn-rebind-down').addEventListener('click', () => {
-      isRebindingDown = true;
-      isRebindingUp = false;
-      document.getElementById('btn-rebind-down').classList.add('ring-2', 'ring-amber-400');
-      showToast("변경할 아래로 이동 키를 감지하는 중...");
-    });
-
-    // Touch controls
-    document.getElementById('btn-touch-up').addEventListener('touchstart', (e) => { e.preventDefault(); moveLane('UP'); });
-    document.getElementById('btn-touch-down').addEventListener('touchstart', (e) => { e.preventDefault(); moveLane('DOWN'); });
+    document.getElementById('btn-rebind-hit').onclick = () => { isRebindingHit = true; showToast("변경할 타격 키를 누르세요..."); };
+    
+    // Mobile Touch and Hold Handlers
+    const touchBtn = document.getElementById('btn-touch-hit');
+    touchBtn.ontouchstart = (e) => { e.preventDefault(); gameState.isHoldingKey = true; triggerHitSpacebar(); };
+    touchBtn.ontouchend = (e) => { e.preventDefault(); gameState.isHoldingKey = false; };
 
     function togglePause() {
       if (!gameState.isPlaying) return;
@@ -1344,119 +1388,65 @@
       document.getElementById('modal-pause').classList.toggle('hidden', !gameState.isPaused);
     }
 
-    // Main Menu Buttons
-    document.getElementById('btn-main-start').addEventListener('click', () => {
+    document.getElementById('btn-main-start').onclick = () => {
       initAudio();
       document.getElementById('modal-main-menu').classList.add('hidden');
       document.getElementById('modal-name-prompt').classList.remove('hidden');
-    });
+    };
+    document.getElementById('btn-main-settings').onclick = () => { document.getElementById('modal-settings').classList.remove('hidden'); };
+    document.getElementById('btn-main-saveload').onclick = () => { updateUIHeaderAndInfo(); document.getElementById('modal-saveload').classList.remove('hidden'); };
 
-    document.getElementById('btn-main-settings').addEventListener('click', () => {
-      document.getElementById('modal-settings').classList.remove('hidden');
-    });
-
-    document.getElementById('btn-main-saveload').addEventListener('click', () => {
-      updateUIHeaderAndInfo();
-      document.getElementById('modal-saveload').classList.remove('hidden');
-    });
-
-    // Name Prompt Buttons
-    document.getElementById('btn-name-cancel').addEventListener('click', () => {
+    document.getElementById('btn-name-cancel').onclick = () => {
       document.getElementById('modal-name-prompt').classList.add('hidden');
       document.getElementById('modal-main-menu').classList.remove('hidden');
-    });
-
-    document.getElementById('btn-name-confirm').addEventListener('click', () => {
-      const nameInput = document.getElementById('input-student-name').value.trim();
-      if (nameInput) gameState.playerName = nameInput;
+    };
+    document.getElementById('btn-name-confirm').onclick = () => {
+      const input = document.getElementById('input-student-name').value.trim();
+      if (input) gameState.playerName = input;
       saveData();
-      updateUIHeaderAndInfo();
-
       document.getElementById('modal-name-prompt').classList.add('hidden');
       launchCurrentStage();
-    });
+    };
 
-    // Pause Menu Buttons
-    document.getElementById('btn-pause-toggle').addEventListener('click', togglePause);
-    document.getElementById('btn-resume').addEventListener('click', togglePause);
-    document.getElementById('btn-restart').addEventListener('click', () => {
-      document.getElementById('modal-pause').classList.add('hidden');
-      launchCurrentStage();
-    });
-    document.getElementById('btn-quit').addEventListener('click', () => {
-      document.getElementById('modal-pause').classList.add('hidden');
-      gameState.isPlaying = false;
-      gameState.isPaused = false;
-      stopBGM();
-      document.getElementById('hud-layer').classList.add('hidden');
-      document.getElementById('btn-pause-toggle').classList.add('hidden');
-      document.getElementById('modal-main-menu').classList.remove('hidden');
-    });
+    document.getElementById('btn-settings-toggle').onclick = () => { document.getElementById('modal-settings').classList.remove('hidden'); };
+    document.getElementById('btn-close-settings').onclick = () => { document.getElementById('modal-settings').classList.add('hidden'); };
+    document.getElementById('btn-save-settings').onclick = () => { saveData(); document.getElementById('modal-settings').classList.add('hidden'); showToast("설정이 저장되었습니다."); };
 
-    // Settings Modal Buttons
-    document.getElementById('btn-settings-toggle').addEventListener('click', () => {
-      document.getElementById('modal-settings').classList.remove('hidden');
-    });
-    document.getElementById('btn-close-settings').addEventListener('click', () => {
-      document.getElementById('modal-settings').classList.add('hidden');
-    });
-    document.getElementById('btn-save-settings').addEventListener('click', () => {
-      saveData();
-      document.getElementById('modal-settings').classList.add('hidden');
-      showToast("설정이 저장되었습니다!");
-    });
+    document.getElementById('slider-bgm').oninput = (e) => { gameState.bgmVol = parseInt(e.target.value, 10) / 100; document.getElementById('bgm-val-text').innerText = `${e.target.value}%`; };
+    document.getElementById('slider-sfx').oninput = (e) => { gameState.sfxVol = parseInt(e.target.value, 10) / 100; document.getElementById('sfx-val-text').innerText = `${e.target.value}%`; };
 
-    document.getElementById('slider-bgm').addEventListener('input', (e) => {
-      gameState.bgmVol = parseInt(e.target.value, 10) / 100;
-      document.getElementById('bgm-val-text').innerText = `${e.target.value}%`;
-    });
-    document.getElementById('slider-sfx').addEventListener('input', (e) => {
-      gameState.sfxVol = parseInt(e.target.value, 10) / 100;
-      document.getElementById('sfx-val-text').innerText = `${e.target.value}%`;
-    });
-
-    document.getElementById('btn-reset-data').addEventListener('click', () => {
+    document.getElementById('btn-reset-data').onclick = () => {
       localStorage.clear();
-      gameState.playerName = "김민첩";
-      gameState.highScore = 0;
-      gameState.unlockedStage = 1;
-      gameState.currentStage = 1;
-      gameState.bgmVol = 0.7;
-      gameState.sfxVol = 0.8;
-      gameState.keyUp = 'ArrowUp';
-      gameState.keyDown = 'ArrowDown';
+      gameState.playerName = "김민첩"; gameState.highScore = 0; gameState.unlockedStage = 1; gameState.currentStage = 1;
       updateUIHeaderAndInfo();
       document.getElementById('modal-settings').classList.add('hidden');
       showToast("모든 데이터가 초기화되었습니다.");
-    });
+    };
 
-    // Save/Load Modal Buttons
-    document.getElementById('btn-quick-save').addEventListener('click', () => {
-      saveData();
-      showToast("진행 상황이 저장되었습니다!");
-    });
-    document.getElementById('btn-close-saveload').addEventListener('click', () => {
-      document.getElementById('modal-saveload').classList.add('hidden');
-    });
-    document.getElementById('btn-execute-save').addEventListener('click', () => {
-      saveData();
-      showToast("저장 완료되었습니다!");
-    });
-    document.getElementById('btn-execute-load').addEventListener('click', () => {
-      loadSavedData();
-      showToast("저장된 기록을 불러왔습니다!");
-      document.getElementById('modal-saveload').classList.add('hidden');
-    });
+    document.getElementById('btn-quick-save').onclick = () => { saveData(); showToast("진행 상태가 저장되었습니다!"); };
+    document.getElementById('btn-close-saveload').onclick = () => { document.getElementById('modal-saveload').classList.add('hidden'); };
+    document.getElementById('btn-execute-save').onclick = () => { saveData(); showToast("저장 완료되었습니다!"); };
+    document.getElementById('btn-execute-load').onclick = () => { loadSavedData(); showToast("저장된 데이터를 불러왔습니다!"); document.getElementById('modal-saveload').classList.add('hidden'); };
 
-    document.getElementById('btn-result-main').addEventListener('click', () => {
+    document.getElementById('btn-pause-toggle').onclick = togglePause;
+    document.getElementById('btn-resume').onclick = togglePause;
+    document.getElementById('btn-restart').onclick = () => { document.getElementById('modal-pause').classList.add('hidden'); launchCurrentStage(); };
+    document.getElementById('btn-quit').onclick = () => {
+      document.getElementById('modal-pause').classList.add('hidden');
+      gameState.isPlaying = false; gameState.isPaused = false;
+      document.getElementById('hud-layer').classList.add('hidden');
+      document.getElementById('btn-pause-toggle').classList.add('hidden');
+      document.getElementById('modal-main-menu').classList.remove('hidden');
+    };
+
+    document.getElementById('btn-result-main').onclick = () => {
       document.getElementById('modal-result').classList.add('hidden');
       document.getElementById('modal-main-menu').classList.remove('hidden');
-    });
+    };
 
     window.onload = () => {
       loadSavedData();
       resizeCanvas();
-      selectStage(1);
       render();
     };
   </script>
