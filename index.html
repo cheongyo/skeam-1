@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Cyberpunk FPS Survival - GitHub Edition</title>
+    <title>3D Cyberpunk FPS Survival - Enhanced Edition</title>
     <!-- Tailwind CSS for sleek UI overlay -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts for Cyberpunk aesthetic -->
@@ -104,6 +104,18 @@
         @keyframes fadeOut {
             from { opacity: 1; }
             to { opacity: 0; }
+        }
+
+        /* Custom Scrollbar for modals */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(13, 6, 20, 0.8);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ff007f;
+            border-radius: 3px;
         }
     </style>
 </head>
@@ -235,30 +247,159 @@
         </div>
     </div>
 
-    <!-- Start Screen Modal -->
-    <div id="start-screen" class="absolute inset-0 bg-purple-950/85 backdrop-blur-lg z-30 flex flex-col items-center justify-center text-white p-6">
-        <div class="max-w-xl text-center space-y-6">
-            <h1 class="text-6xl font-orbitron font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-500 to-purple-400 drop-shadow-[0_0_25px_rgba(0,240,255,0.8)]">
-                CYBER SURVIVOR 3D
-            </h1>
-            <p class="text-cyan-200 text-lg font-medium leading-relaxed">
-                밝게 빛나는 네온 사이버시티에 침입한 안드로이드 사이버병사들을 소탕하세요!<br>
-                필드 곳곳의 무기, 구급상자, 탄약 상자를 파밍하며 웨이브를 정복하세요.
-            </p>
-
-            <!-- Control Guide Box -->
-            <div class="bg-purple-900/50 border border-pink-500/40 rounded-xl p-5 text-left text-sm grid grid-cols-2 gap-3 text-cyan-100 shadow-[0_0_15px_rgba(255,0,127,0.2)]">
-                <div><span class="text-pink-400 font-bold">[W][A][S][D]</span> : 이동 / [Shift] 달리기</div>
-                <div><span class="text-pink-400 font-bold">[마우스 이동]</span> : 조준 및 시점 변경</div>
-                <div><span class="text-pink-400 font-bold">[좌클릭]</span> : 발사</div>
-                <div><span class="text-pink-400 font-bold">[우클릭]</span> : 저격 스코프 줌</div>
-                <div><span class="text-pink-400 font-bold">[1] [2] [3] [4]</span> : 무기 교체</div>
-                <div><span class="text-pink-400 font-bold">[R]</span> : 재장전 / <span class="text-pink-400 font-bold">[Space]</span> : 점프</div>
+    <!-- Start Screen Main Menu -->
+    <div id="start-screen" class="absolute inset-0 bg-purple-950/90 backdrop-blur-lg z-30 flex flex-col items-center justify-center text-white p-6">
+        <div class="max-w-xl w-full text-center space-y-8">
+            <div>
+                <h1 class="text-5xl md:text-6xl font-orbitron font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-500 to-purple-400 drop-shadow-[0_0_25px_rgba(0,240,255,0.8)]">
+                    CYBER SURVIVOR 3D
+                </h1>
+                <p class="text-cyan-200 text-base md:text-lg font-medium leading-relaxed mt-3">
+                    네온 사이버시티를 위협하는 안드로이드 군단을 제압하세요!<br>
+                    필드 아이템과 특수 무기를 활용해 살아남으세요.
+                </p>
             </div>
 
-            <button id="btn-start" class="px-10 py-4 bg-gradient-to-r from-cyan-500 via-pink-500 to-purple-600 rounded-2xl text-2xl font-orbitron font-black tracking-wider text-white shadow-[0_0_25px_rgba(0,240,255,0.6)] hover:shadow-[0_0_40px_rgba(255,0,127,0.9)] transition-all transform hover:scale-105 active:scale-95 border border-cyan-300/50">
-                CYBER START (시작)
+            <!-- Main Menu Buttons -->
+            <div class="flex flex-col gap-4 max-w-md mx-auto w-full">
+                <button id="btn-start" class="w-full py-4 bg-gradient-to-r from-cyan-500 via-pink-500 to-purple-600 rounded-2xl text-2xl font-orbitron font-black tracking-wider text-white shadow-[0_0_25px_rgba(0,240,255,0.6)] hover:shadow-[0_0_40px_rgba(255,0,127,0.9)] transition-all transform hover:scale-105 active:scale-95 border border-cyan-300/50 flex items-center justify-center gap-3">
+                    <span>🚀</span> 게임 시작 (START)
+                </button>
+
+                <button id="btn-open-tutorial" class="w-full py-3.5 bg-purple-900/80 hover:bg-purple-800 rounded-2xl text-xl font-orbitron font-bold tracking-wider text-cyan-300 border border-cyan-500/50 shadow-[0_0_15px_rgba(0,240,255,0.3)] hover:shadow-[0_0_25px_rgba(0,240,255,0.6)] transition-all transform hover:scale-102 flex items-center justify-center gap-3">
+                    <span>🎓</span> 튜토리얼 (TUTORIAL)
+                </button>
+
+                <button id="btn-open-settings" class="w-full py-3.5 bg-purple-950/80 hover:bg-purple-900 rounded-2xl text-xl font-orbitron font-bold tracking-wider text-pink-300 border border-pink-500/50 shadow-[0_0_15px_rgba(255,0,127,0.3)] hover:shadow-[0_0_25px_rgba(255,0,127,0.6)] transition-all transform hover:scale-102 flex items-center justify-center gap-3">
+                    <span>⚙️</span> 설정 (SETTINGS)
+                </button>
+            </div>
+
+            <div class="text-xs text-purple-300/70 font-mono tracking-wider">
+                VERSION 2.0 • OPTIMIZED AABB COLLISION & SFX CONTROLS
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Settings Window -->
+    <div id="settings-modal" class="absolute inset-0 bg-slate-950/90 backdrop-blur-xl z-40 flex items-center justify-center p-6 hidden">
+        <div class="bg-purple-950/90 border-2 border-pink-500/60 rounded-2xl max-w-lg w-full p-6 text-white shadow-[0_0_35px_rgba(255,0,127,0.4)] space-y-6">
+            <div class="flex justify-between items-center border-b border-pink-500/30 pb-3">
+                <h2 class="text-2xl font-orbitron font-black text-pink-400 neon-glow-magenta flex items-center gap-2">
+                    <span>⚙️</span> 게임 설정 (SETTINGS)
+                </h2>
+                <button id="btn-close-settings" class="text-gray-400 hover:text-white text-2xl font-bold px-2">✕</button>
+            </div>
+
+            <!-- Controls Sliders -->
+            <div class="space-y-5 font-medium">
+                <!-- Sensitivity -->
+                <div>
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="text-cyan-300 font-bold">마우스 조준 감도 (Sensitivity)</span>
+                        <span id="val-sensitivity" class="text-pink-400 font-orbitron font-bold">2.2</span>
+                    </div>
+                    <input id="slider-sensitivity" type="range" min="0.5" max="5.0" step="0.1" value="2.2" class="w-full accent-pink-500 bg-purple-900 rounded-lg cursor-pointer">
+                </div>
+
+                <!-- Master Volume -->
+                <div>
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="text-cyan-300 font-bold">마스터 음량 (Master Volume)</span>
+                        <span id="val-master-vol" class="text-pink-400 font-orbitron font-bold">80%</span>
+                    </div>
+                    <input id="slider-master-vol" type="range" min="0" max="100" value="80" class="w-full accent-cyan-400 bg-purple-900 rounded-lg cursor-pointer">
+                </div>
+
+                <!-- SFX Volume -->
+                <div>
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="text-cyan-300 font-bold">효과음 음량 (SFX Volume)</span>
+                        <span id="val-sfx-vol" class="text-pink-400 font-orbitron font-bold">80%</span>
+                    </div>
+                    <input id="slider-sfx-vol" type="range" min="0" max="100" value="80" class="w-full accent-cyan-400 bg-purple-900 rounded-lg cursor-pointer">
+                </div>
+
+                <!-- Controls summary inside settings -->
+                <div class="bg-purple-900/40 p-4 rounded-xl border border-cyan-500/30 text-xs space-y-1.5 text-cyan-200">
+                    <div class="font-bold text-pink-400 mb-1">🎮 조작법 요약</div>
+                    <div>• 이동: WASD | 달리게: Left Shift | 점프: Space</div>
+                    <div>• 발사: 마우스 좌클릭 | 스코프 줌: 마우스 우클릭 (저격총)</div>
+                    <div>• 재장전: R | 무기 교체: 1, 2, 3, 4 키</div>
+                </div>
+            </div>
+
+            <button id="btn-save-settings" class="w-full py-3 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 rounded-xl font-orbitron font-bold text-white shadow-[0_0_15px_rgba(255,0,127,0.5)] transition-all">
+                설정 저장 및 닫기
             </button>
+        </div>
+    </div>
+
+    <!-- Modal: Tutorial Window -->
+    <div id="tutorial-modal" class="absolute inset-0 bg-slate-950/90 backdrop-blur-xl z-40 flex items-center justify-center p-6 hidden">
+        <div class="bg-purple-950/95 border-2 border-cyan-500/60 rounded-2xl max-w-2xl w-full p-6 text-white shadow-[0_0_35px_rgba(0,240,255,0.4)] space-y-6">
+            <div class="flex justify-between items-center border-b border-cyan-500/30 pb-3">
+                <h2 class="text-2xl font-orbitron font-black text-cyan-300 neon-glow-cyan flex items-center gap-2">
+                    <span>🎓</span> 신병 훈련 튜토리얼 (TUTORIAL)
+                </h2>
+                <button id="btn-close-tutorial" class="text-gray-400 hover:text-white text-2xl font-bold px-2">✕</button>
+            </div>
+
+            <!-- Tutorial Tabs / Pages -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <!-- Card 1 -->
+                <div class="bg-purple-900/50 p-4 rounded-xl border border-cyan-500/40 space-y-2">
+                    <div class="text-lg font-bold text-cyan-300 font-orbitron flex items-center gap-2">
+                        <span>🕹️</span> 1. 기본 이동
+                    </div>
+                    <ul class="text-xs text-cyan-100 space-y-1.5 list-disc list-inside">
+                        <li><b class="text-pink-400">WASD</b>: 전후좌우 이동</li>
+                        <li><b class="text-pink-400">Shift</b>: 고속 달리기</li>
+                        <li><b class="text-pink-400">Space</b>: 구조물 넘기 점프</li>
+                        <li><b class="text-pink-400">마우스</b>: 360도 시점 회전</li>
+                    </ul>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-purple-900/50 p-4 rounded-xl border border-pink-500/40 space-y-2">
+                    <div class="text-lg font-bold text-pink-300 font-orbitron flex items-center gap-2">
+                        <span>🔫</span> 2. 무기 및 전투
+                    </div>
+                    <ul class="text-xs text-cyan-100 space-y-1.5 list-disc list-inside">
+                        <li><b class="text-pink-400">좌클릭</b>: 무기 발사</li>
+                        <li><b class="text-pink-400">우클릭</b>: 저격 스코프 확대</li>
+                        <li><b class="text-pink-400">1~4 키</b>: 권총, 소총, 샷건, 저격총</li>
+                        <li><b class="text-pink-400">R 키</b>: 탄약 재장전</li>
+                    </ul>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-purple-900/50 p-4 rounded-xl border border-yellow-500/40 space-y-2">
+                    <div class="text-lg font-bold text-yellow-300 font-orbitron flex items-center gap-2">
+                        <span>📦</span> 3. 파밍 & 생존
+                    </div>
+                    <ul class="text-xs text-cyan-100 space-y-1.5 list-disc list-inside">
+                        <li><b class="text-emerald-400">십자가 아이템</b>: 체력 +35 회복</li>
+                        <li><b class="text-yellow-400">상자 아이템</b>: 전 무기 탄약 충전</li>
+                        <li><b class="text-pink-400">네온 링</b>: 새로운 무기 해금</li>
+                        <li>웨이브마다 강력해지는 적 제압</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Notice about Easy Stage 1 -->
+            <div class="bg-emerald-950/60 border border-emerald-500/50 p-3 rounded-xl text-emerald-200 text-xs flex items-center gap-3">
+                <span class="text-2xl">💡</span>
+                <div>
+                    <b>첫 스테이지 입문 안내:</b> 웨이브 1에서는 적 2명만 등장하며, 이동 속도와 공격력이 낮아 안전하게 사격 및 엄폐 연습을 진행할 수 있습니다.
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button id="btn-start-from-tutorial" class="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-pink-500 hover:from-cyan-400 hover:to-pink-400 rounded-xl font-orbitron font-black text-white shadow-[0_0_20px_rgba(0,240,255,0.5)] transition-all">
+                    훈련 완료 및 게임 시작
+                </button>
+            </div>
         </div>
     </div>
 
@@ -291,11 +432,13 @@
 
     <script>
     /* =========================================================================
-       1. WEB AUDIO API SYNTHESIZER
+       1. WEB AUDIO API SYNTHESIZER WITH VOLUME CONTROL
        ========================================================================= */
     class SoundEngine {
         constructor() {
             this.ctx = null;
+            this.masterVolume = 0.8;
+            this.sfxVolume = 0.8;
         }
 
         init() {
@@ -307,17 +450,28 @@
             }
         }
 
+        setMasterVolume(val) {
+            this.masterVolume = Math.max(0, Math.min(1, val));
+        }
+
+        setSfxVolume(val) {
+            this.sfxVolume = Math.max(0, Math.min(1, val));
+        }
+
         playShot(freqStart, freqEnd, duration, type = 'sawtooth', volume = 0.3) {
             if (!this.ctx) return;
             try {
+                const effectiveVolume = volume * this.masterVolume * this.sfxVolume;
+                if (effectiveVolume <= 0.001) return;
+
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
                 osc.type = type;
                 osc.frequency.setValueAtTime(freqStart, this.ctx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(Math.max(freqEnd, 10), this.ctx.currentTime + duration);
 
-                gain.gain.setValueAtTime(volume, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+                gain.gain.setValueAtTime(effectiveVolume, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
 
                 osc.connect(gain);
                 gain.connect(this.ctx.destination);
@@ -336,13 +490,16 @@
 
         playHit() {
             if (!this.ctx) return;
+            const effectiveVolume = 0.25 * this.masterVolume * this.sfxVolume;
+            if (effectiveVolume <= 0.001) return;
+
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
             osc.type = 'sine';
             osc.frequency.setValueAtTime(900, this.ctx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(450, this.ctx.currentTime + 0.05);
-            gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
+            gain.gain.setValueAtTime(effectiveVolume, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
             osc.connect(gain);
             gain.connect(this.ctx.destination);
             osc.start();
@@ -356,14 +513,17 @@
         playPickup() {
             if (!this.ctx) return;
             const now = this.ctx.currentTime;
+            const effectiveVolume = 0.3 * this.masterVolume * this.sfxVolume;
+            if (effectiveVolume <= 0.001) return;
+
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
             osc.type = 'sine';
             osc.frequency.setValueAtTime(523.25, now);
             osc.frequency.setValueAtTime(659.25, now + 0.08);
             osc.frequency.setValueAtTime(783.99, now + 0.16);
-            gain.gain.setValueAtTime(0.3, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            gain.gain.setValueAtTime(effectiveVolume, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
             osc.connect(gain);
             gain.connect(this.ctx.destination);
             osc.start();
@@ -446,7 +606,7 @@
     };
 
     /* =========================================================================
-       3. THREE.JS SCENE SETUP & CYBERPUNK ENVIRONMENT (OPTIMIZED)
+       3. THREE.JS SCENE SETUP & CYBERPUNK ENVIRONMENT
        ========================================================================= */
     let scene, camera, renderer;
     let clock = new THREE.Clock();
@@ -460,7 +620,7 @@
     const particles = [];
     let gameStarted = false;
 
-    // Optimized Raycast Hitboxes Array to prevent searching full scene tree
+    // Fast Raycast Hitboxes Array
     const enemyHitboxes = [];
 
     // Screen Shake variables
@@ -497,7 +657,7 @@
     let muzzleLight;
     const gunMeshes = {};
 
-    // Shared Materials & Geometries for high performance
+    // Shared Materials & Geometries for performance
     const SHARED_GEOMETRIES = {
         particle: new THREE.BoxGeometry(0.12, 0.12, 0.12),
         hitbox: new THREE.BoxGeometry(1.2, 2.0, 1.2)
@@ -525,10 +685,8 @@
             powerPreference: "high-performance" 
         });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        // Lock pixel ratio to max 1.25 for lag-free performance on all screens
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
         
-        // Optimize Shadow map size and rendering
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.BasicShadowMap;
 
@@ -618,10 +776,10 @@
         const halfSize = MAP_SIZE / 2;
 
         const walls = [
-            { size: [MAP_SIZE, wallHeight, 1], pos: [0, wallHeight / 2, -halfSize] },
-            { size: [MAP_SIZE, wallHeight, 1], pos: [0, wallHeight / 2, halfSize] },
-            { size: [1, wallHeight, MAP_SIZE], pos: [-halfSize, wallHeight / 2, 0] },
-            { size: [1, wallHeight, MAP_SIZE], pos: [halfSize, wallHeight / 2, 0] }
+            { size: [MAP_SIZE, wallHeight, 2], pos: [0, wallHeight / 2, -halfSize] },
+            { size: [MAP_SIZE, wallHeight, 2], pos: [0, wallHeight / 2, halfSize] },
+            { size: [2, wallHeight, MAP_SIZE], pos: [-halfSize, wallHeight / 2, 0] },
+            { size: [2, wallHeight, MAP_SIZE], pos: [halfSize, wallHeight / 2, 0] }
         ];
 
         walls.forEach(w => {
@@ -722,7 +880,6 @@
        5. MAP COVER & ITEM PICKUP SPAWNING
        ========================================================================= */
     function spawnMapCoverAndItems() {
-        const boxGeo = new THREE.BoxGeometry(3.5, 3.5, 3.5);
         const boxMat = new THREE.MeshStandardMaterial({ 
             color: 0x251342, 
             emissive: 0xff007f, 
@@ -730,13 +887,80 @@
             roughness: 0.4 
         });
 
+        const pillarMat = new THREE.MeshStandardMaterial({
+            color: 0x120826,
+            emissive: 0x00f0ff,
+            emissiveIntensity: 0.3,
+            roughness: 0.3
+        });
+
+        const barrierMat = new THREE.MeshStandardMaterial({
+            color: 0x1e0e38,
+            emissive: 0xffaa00,
+            emissiveIntensity: 0.3,
+            roughness: 0.5
+        });
+
+        // 1. Central Monolith Tower
+        const centerTower = new THREE.Mesh(new THREE.BoxGeometry(6, 12, 6), pillarMat);
+        centerTower.position.set(0, 6, 0);
+        centerTower.castShadow = true;
+        centerTower.receiveShadow = true;
+        scene.add(centerTower);
+        obstacles.push(new THREE.Box3().setFromObject(centerTower));
+        obstacleMeshes.push(centerTower);
+
+        // 2. Pillars
+        const pillarGeo = new THREE.CylinderGeometry(1.2, 1.2, 9, 12);
+        const pillarPositions = [
+            [-22, 4.5, -22], [22, 4.5, -22],
+            [-22, 4.5, 22], [22, 4.5, 22],
+            [0, 4.5, -28], [0, 4.5, 28],
+            [-28, 4.5, 0], [28, 4.5, 0]
+        ];
+
+        pillarPositions.forEach(p => {
+            const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+            pillar.position.set(p[0], p[1], p[2]);
+            pillar.castShadow = true;
+            pillar.receiveShadow = true;
+            scene.add(pillar);
+            obstacles.push(new THREE.Box3().setFromObject(pillar));
+            obstacleMeshes.push(pillar);
+        });
+
+        // 3. Barricade Walls
+        const barrierGeo = new THREE.BoxGeometry(8, 2.2, 1.2);
+        const barrierPositions = [
+            { pos: [-10, 1.1, -10], rot: 0 },
+            { pos: [10, 1.1, -10], rot: Math.PI / 4 },
+            { pos: [-10, 1.1, 10], rot: -Math.PI / 4 },
+            { pos: [10, 1.1, 10], rot: 0 },
+            { pos: [-18, 1.1, -5], rot: Math.PI / 2 },
+            { pos: [18, 1.1, 5], rot: Math.PI / 2 }
+        ];
+
+        barrierPositions.forEach(b => {
+            const barrier = new THREE.Mesh(barrierGeo, barrierMat);
+            barrier.position.set(...b.pos);
+            barrier.rotation.y = b.rot;
+            barrier.castShadow = true;
+            barrier.receiveShadow = true;
+            scene.add(barrier);
+            obstacles.push(new THREE.Box3().setFromObject(barrier));
+            obstacleMeshes.push(barrier);
+        });
+
+        // 4. Crates
+        const boxGeo = new THREE.BoxGeometry(3, 3, 3);
         for (let i = 0; i < 20; i++) {
             const box = new THREE.Mesh(boxGeo, boxMat);
-            const x = (Math.random() - 0.5) * (MAP_SIZE - 25);
-            const z = (Math.random() - 0.5) * (MAP_SIZE - 25);
-            if (Math.hypot(x, z) < 10) continue;
+            const x = (Math.random() - 0.5) * (MAP_SIZE - 35);
+            const z = (Math.random() - 0.5) * (MAP_SIZE - 35);
+            if (Math.hypot(x, z) < 12) continue;
 
-            box.position.set(x, 1.75, z);
+            box.position.set(x, 1.5, z);
+            box.rotation.y = (Math.random() - 0.5) * Math.PI;
             box.castShadow = true;
             box.receiveShadow = true;
             scene.add(box);
@@ -745,14 +969,15 @@
             obstacleMeshes.push(box);
         }
 
-        spawnWeaponPickup('rifle', -18, -18);
-        spawnWeaponPickup('shotgun', 18, -18);
-        spawnWeaponPickup('sniper', 0, 25);
+        // Spawn items
+        spawnWeaponPickup('rifle', -20, -20);
+        spawnWeaponPickup('shotgun', 20, -20);
+        spawnWeaponPickup('sniper', 0, 30);
 
-        spawnItem('medkit', -12, 12);
-        spawnItem('medkit', 12, -12);
-        spawnItem('ammo', 15, 15);
-        spawnItem('ammo', -15, -15);
+        spawnItem('medkit', -14, 14);
+        spawnItem('medkit', 14, -14);
+        spawnItem('ammo', 18, 18);
+        spawnItem('ammo', -18, -18);
     }
 
     function spawnItem(type, x, z) {
@@ -798,16 +1023,23 @@
     }
 
     /* =========================================================================
-       6. HUMANOID CYBER SOLDIER ENEMY AI & WAVE SYSTEM
+       6. HUMANOID CYBER SOLDIER ENEMY AI & WAVE SYSTEM (EASY STAGE 1)
        ========================================================================= */
     function startNextWave() {
         showNotice(`CYBER WAVE ${player.wave} START`);
-        const enemyCount = 5 + (player.wave - 1) * 3;
+
+        // Stage 1 Difficulty Balancing: Wave 1 starts with only 2 easy enemies!
+        let enemyCount;
+        if (player.wave === 1) {
+            enemyCount = 2; // Reduced for beginners
+        } else {
+            enemyCount = 3 + (player.wave - 2) * 2;
+        }
 
         for (let i = 0; i < enemyCount; i++) {
             setTimeout(() => {
                 if (gameStarted) spawnEnemy();
-            }, i * 350);
+            }, i * 800);
         }
         updateHUD();
     }
@@ -815,13 +1047,12 @@
     function createHumanoidCyberSoldier() {
         const group = new THREE.Group();
 
-        // Shared materials
         const armorMat = new THREE.MeshStandardMaterial({ color: 0x180b2a, roughness: 0.3, metalness: 0.8 });
         const jointMat = new THREE.MeshStandardMaterial({ color: 0x0a0412, roughness: 0.5 });
         const visorMat = new THREE.MeshStandardMaterial({ color: 0xff007f, emissive: 0xff007f, emissiveIntensity: 1.5 });
         const coreMat = new THREE.MeshStandardMaterial({ color: 0x00f0ff, emissive: 0x00f0ff, emissiveIntensity: 1.5 });
 
-        // --- TORSO ---
+        // Torso
         const torso = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.8, 0.4), armorMat);
         torso.position.y = 1.3;
         torso.castShadow = true;
@@ -832,39 +1063,34 @@
         core.position.set(0, 1.35, 0.21);
         group.add(core);
 
-        // --- HEAD ---
+        // Head
         const head = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.42, 0.4), armorMat);
         head.position.y = 1.95;
         head.castShadow = true;
         group.add(head);
 
-        // Glowing Cyber Visor
+        // Visor
         const visor = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.12, 0.1), visorMat);
         visor.position.set(0, 1.98, 0.21);
         group.add(visor);
 
-        // --- ARMS & LEGS GROUPS (For Walking Animation) ---
-        // Left Arm Group
+        // Limbs
         const leftArmGroup = new THREE.Group();
         leftArmGroup.position.set(-0.48, 1.6, 0);
-        const leftShoulder = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.2), armorMat);
         const leftArm = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.6, 0.18), armorMat);
         leftArm.position.y = -0.3;
-        leftArmGroup.add(leftShoulder, leftArm);
+        leftArmGroup.add(leftArm);
         group.add(leftArmGroup);
 
-        // Right Arm Group (Holding Cyber Gun)
         const rightArmGroup = new THREE.Group();
         rightArmGroup.position.set(0.48, 1.6, 0);
-        const rightShoulder = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.2), armorMat);
         const rightArm = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.6, 0.18), armorMat);
         rightArm.position.y = -0.3;
         const enemyGun = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.15, 0.45), jointMat);
         enemyGun.position.set(0, -0.5, 0.2);
-        rightArmGroup.add(rightShoulder, rightArm, enemyGun);
+        rightArmGroup.add(rightArm, enemyGun);
         group.add(rightArmGroup);
 
-        // Left Leg Group
         const leftLegGroup = new THREE.Group();
         leftLegGroup.position.set(-0.2, 0.9, 0);
         const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.8, 0.22), armorMat);
@@ -872,7 +1098,6 @@
         leftLegGroup.add(leftLeg);
         group.add(leftLegGroup);
 
-        // Right Leg Group
         const rightLegGroup = new THREE.Group();
         rightLegGroup.position.set(0.2, 0.9, 0);
         const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.8, 0.22), armorMat);
@@ -880,7 +1105,7 @@
         rightLegGroup.add(rightLeg);
         group.add(rightLegGroup);
 
-        // Invisible Raycast Hitbox Mesh for Fast Collision Check
+        // Hitbox
         const hitbox = new THREE.Mesh(SHARED_GEOMETRIES.hitbox, SHARED_MATERIALS.hitboxDebug);
         hitbox.position.y = 1.0;
         group.add(hitbox);
@@ -900,14 +1125,27 @@
         const humanoid = createHumanoidCyberSoldier();
         const group = humanoid.group;
 
-        // Random edge spawn position
         const angle = Math.random() * Math.PI * 2;
-        const dist = 30 + Math.random() * 20;
+        const dist = 30 + Math.random() * 18;
         group.position.set(Math.cos(angle) * dist, 0, Math.sin(angle) * dist);
 
         scene.add(group);
 
-        const maxHp = 60 + (player.wave - 1) * 25;
+        // Stage 1 stats lower for easier intro
+        let maxHp, enemySpeed, shootInterval, enemyDmg;
+
+        if (player.wave === 1) {
+            maxHp = 45; // lower hp
+            enemySpeed = 3.8; // slower move speed
+            shootInterval = 2200; // longer reaction interval
+            enemyDmg = 8; // lower damage
+        } else {
+            maxHp = 55 + (player.wave - 2) * 20;
+            enemySpeed = 4.5 + Math.min(player.wave * 0.5, 7.5);
+            shootInterval = Math.max(1800 - player.wave * 120, 650);
+            enemyDmg = 10 + player.wave * 2;
+        }
+
         const enemyObj = {
             mesh: group,
             hitbox: humanoid.hitbox,
@@ -918,14 +1156,13 @@
             armorMat: humanoid.armorMat,
             hp: maxHp,
             maxHp: maxHp,
-            speed: 5 + Math.min(player.wave * 0.5, 8),
-            lastShot: 0,
-            shootInterval: Math.max(1800 - player.wave * 100, 700),
-            damage: 12 + player.wave * 2,
+            speed: enemySpeed,
+            lastShot: Date.now() + Math.random() * 1000,
+            shootInterval: shootInterval,
+            damage: enemyDmg,
             animOffset: Math.random() * 10
         };
 
-        // Bind reference back for raycasting
         humanoid.hitbox.userData.enemyRef = enemyObj;
 
         enemies.push(enemyObj);
@@ -935,7 +1172,7 @@
     }
 
     /* =========================================================================
-       7. PLAYER MOVEMENT & CONTROLS
+       7. PLAYER & ENEMY WALL COLLISION PHYSICS (AABB BOX3)
        ========================================================================= */
     const euler = new THREE.Euler(0, 0, 0, 'YXZ');
 
@@ -994,6 +1231,24 @@
         camera.updateProjectionMatrix();
     }
 
+    // Player AABB Collision Box
+    const playerBoundingBox = new THREE.Box3();
+    const playerRadius = 0.6;
+
+    function checkCollisionAtPosition(posX, posZ) {
+        playerBoundingBox.setFromCenterAndSize(
+            new THREE.Vector3(posX, 1.0, posZ),
+            new THREE.Vector3(playerRadius * 2, 2.0, playerRadius * 2)
+        );
+
+        for (let i = 0; i < obstacles.length; i++) {
+            if (obstacles[i].intersectsBox(playerBoundingBox)) {
+                return true; // Collided with an obstacle!
+            }
+        }
+        return false;
+    }
+
     function updatePlayerPhysics(delta) {
         if (!isPointerLocked) return;
 
@@ -1018,15 +1273,21 @@
 
         player.velocity.y -= 24 * delta;
 
-        const nextPos = player.position.clone().addScaledVector(player.velocity, delta);
+        // Collision Check: Try moving X and Z independently so player slides along walls!
+        const dx = player.velocity.x * delta;
+        const dz = player.velocity.z * delta;
 
-        const halfMap = MAP_SIZE / 2 - 1.5;
-        let collideX = Math.abs(nextPos.x) > halfMap;
-        let collideZ = Math.abs(nextPos.z) > halfMap;
+        // Try X Movement
+        if (!checkCollisionAtPosition(player.position.x + dx, player.position.z)) {
+            player.position.x += dx;
+        }
 
-        if (!collideX) player.position.x = nextPos.x;
-        if (!collideZ) player.position.z = nextPos.z;
+        // Try Z Movement
+        if (!checkCollisionAtPosition(player.position.x, player.position.z + dz)) {
+            player.position.z += dz;
+        }
 
+        // Apply Vertical Movement
         player.position.y += player.velocity.y * delta;
 
         if (player.position.y <= 1.7) {
@@ -1037,14 +1298,14 @@
 
         camera.position.copy(player.position);
 
-        // Add Camera Screen Shake recoil effect
+        // Screen shake
         if (screenShakeIntensity > 0) {
             camera.position.x += (Math.random() - 0.5) * screenShakeIntensity;
             camera.position.y += (Math.random() - 0.5) * screenShakeIntensity;
             screenShakeIntensity = Math.max(0, screenShakeIntensity - delta * 0.4);
         }
 
-        // Weapon Sway / Bobbing
+        // Weapon Sway
         const speedMagnitude = Math.hypot(player.velocity.x, player.velocity.z);
         if (speedMagnitude > 1 && player.onGround) {
             const time = clock.getElapsedTime() * 12;
@@ -1081,12 +1342,11 @@
         else if (player.currentWeaponKey === 'shotgun') soundEngine.playShotgun();
         else if (player.currentWeaponKey === 'sniper') soundEngine.playSniper();
 
-        // Gun Kickback & Screen Shake
+        // Gun Kickback
         gunContainer.position.z += wpn.recoil;
         screenShakeIntensity = wpn.shake;
         setTimeout(() => gunContainer.position.z = 0, 70);
 
-        // Muzzle Flash
         muzzleLight.intensity = 3.5;
         setTimeout(() => muzzleLight.intensity = 0, 40);
 
@@ -1110,7 +1370,6 @@
 
         raycaster.set(camera.position, rayDir);
 
-        // FAST OPTIMIZED RAYCASTING: Only check active enemy hitboxes and map obstacle meshes!
         const targetsToTest = [...enemyHitboxes, ...obstacleMeshes];
         const intersects = raycaster.intersectObjects(targetsToTest, false);
 
@@ -1151,7 +1410,6 @@
         enemy.hp -= amount;
         soundEngine.playHit();
 
-        // Flash enemy body
         enemy.armorMat.emissive.setHex(0xff007f);
         enemy.armorMat.emissiveIntensity = 0.8;
         setTimeout(() => {
@@ -1166,7 +1424,6 @@
         if (enemy.hp <= 0) {
             soundEngine.playKill();
             
-            // Explosion particles on enemy destruction
             spawnImpactParticles(enemy.mesh.position.clone().add(new THREE.Vector3(0, 1.2, 0)), 0x00f0ff, 18);
             spawnImpactParticles(enemy.mesh.position.clone().add(new THREE.Vector3(0, 1.2, 0)), 0xff007f, 18);
 
@@ -1181,7 +1438,7 @@
             player.kills++;
             player.score += 250;
 
-            if (Math.random() < 0.5) {
+            if (Math.random() < 0.6) {
                 const dropType = Math.random() < 0.5 ? 'medkit' : 'ammo';
                 spawnItem(dropType, enemy.mesh.position.x, enemy.mesh.position.z);
             }
@@ -1223,7 +1480,7 @@
     }
 
     /* =========================================================================
-       9. ITEM PICKUPS & ENEMY AI ANIMATIONS
+       9. ITEM PICKUPS & ENEMY AI ANIMATIONS WITH OBSTACLE COLLISION
        ========================================================================= */
     function checkItemPickups() {
         items.forEach(item => {
@@ -1264,6 +1521,23 @@
         });
     }
 
+    const enemyBoundingBox = new THREE.Box3();
+    const enemyRadius = 0.5;
+
+    function checkEnemyObstacleCollision(posX, posZ) {
+        enemyBoundingBox.setFromCenterAndSize(
+            new THREE.Vector3(posX, 1.0, posZ),
+            new THREE.Vector3(enemyRadius * 2, 2.0, enemyRadius * 2)
+        );
+
+        for (let i = 0; i < obstacles.length; i++) {
+            if (obstacles[i].intersectsBox(enemyBoundingBox)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function updateEnemies(delta) {
         const now = Date.now();
         const time = clock.getElapsedTime();
@@ -1284,11 +1558,21 @@
 
             enemy.mesh.lookAt(player.position.x, enemy.mesh.position.y, player.position.z);
 
-            // Move towards player
+            // Move towards player with Wall Collision Check
             if (dist > 2.2) {
-                enemy.mesh.position.addScaledVector(dir, enemy.speed * delta);
+                const moveStepX = dir.x * enemy.speed * delta;
+                const moveStepZ = dir.z * enemy.speed * delta;
 
-                // Humanoid Limb Walking Animation
+                // Try X step
+                if (!checkEnemyObstacleCollision(enemy.mesh.position.x + moveStepX, enemy.mesh.position.z)) {
+                    enemy.mesh.position.x += moveStepX;
+                }
+                // Try Z step
+                if (!checkEnemyObstacleCollision(enemy.mesh.position.x, enemy.mesh.position.z + moveStepZ)) {
+                    enemy.mesh.position.z += moveStepZ;
+                }
+
+                // Animation
                 const swing = Math.sin(time * 10 + enemy.animOffset) * 0.5;
                 enemy.leftLeg.rotation.x = swing;
                 enemy.rightLeg.rotation.x = -swing;
@@ -1320,7 +1604,7 @@
         bullets.push({
             mesh: laserMesh,
             dir: dir,
-            speed: 28,
+            speed: 26,
             damage: enemy.damage,
             createdAt: Date.now()
         });
@@ -1390,8 +1674,81 @@
     }
 
     /* =========================================================================
-       10. HUD & GAME STATE MANAGEMENT
+       10. HUD & MENU MODALS EVENT HANDLERS
        ========================================================================= */
+    function setupMenuEvents() {
+        const startScreen = document.getElementById('start-screen');
+        const settingsModal = document.getElementById('settings-modal');
+        const tutorialModal = document.getElementById('tutorial-modal');
+
+        // Main Start Button
+        document.getElementById('btn-start').addEventListener('click', () => {
+            soundEngine.init();
+            document.body.requestPointerLock();
+        });
+
+        // Open Tutorial
+        document.getElementById('btn-open-tutorial').addEventListener('click', () => {
+            tutorialModal.classList.remove('hidden');
+        });
+
+        // Close Tutorial
+        document.getElementById('btn-close-tutorial').addEventListener('click', () => {
+            tutorialModal.classList.add('hidden');
+        });
+
+        document.getElementById('btn-start-from-tutorial').addEventListener('click', () => {
+            tutorialModal.classList.add('hidden');
+            soundEngine.init();
+            document.body.requestPointerLock();
+        });
+
+        // Open Settings
+        document.getElementById('btn-open-settings').addEventListener('click', () => {
+            settingsModal.classList.remove('hidden');
+        });
+
+        // Close Settings
+        document.getElementById('btn-close-settings').addEventListener('click', () => {
+            settingsModal.classList.add('hidden');
+        });
+
+        document.getElementById('btn-save-settings').addEventListener('click', () => {
+            settingsModal.classList.add('hidden');
+            showToast('설정이 저장되었습니다!', 'text-cyan-400');
+        });
+
+        // Settings Sliders Binding
+        const sliderSens = document.getElementById('slider-sensitivity');
+        const valSens = document.getElementById('val-sensitivity');
+        sliderSens.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            valSens.innerText = val.toFixed(1);
+            mouseSensitivity = 0.001 * val;
+        });
+
+        const sliderMaster = document.getElementById('slider-master-vol');
+        const valMaster = document.getElementById('val-master-vol');
+        sliderMaster.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            valMaster.innerText = `${val}%`;
+            soundEngine.setMasterVolume(val / 100);
+        });
+
+        const sliderSfx = document.getElementById('slider-sfx-vol');
+        const valSfx = document.getElementById('val-sfx-vol');
+        sliderSfx.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            valSfx.innerText = `${val}%`;
+            soundEngine.setSfxVolume(val / 100);
+        });
+
+        // Restart button
+        document.getElementById('btn-restart').addEventListener('click', () => {
+            restartGame();
+        });
+    }
+
     function updateHUD() {
         document.getElementById('hud-wave').innerText = player.wave;
         document.getElementById('hud-enemies').innerText = enemies.length;
@@ -1543,20 +1900,15 @@
     window.onload = function () {
         initScene();
         setupControls();
-
-        document.getElementById('btn-start').addEventListener('click', () => {
-            soundEngine.init();
-            document.body.requestPointerLock();
-        });
-
-        document.getElementById('btn-restart').addEventListener('click', () => {
-            restartGame();
-        });
+        setupMenuEvents();
 
         document.addEventListener('pointerlockchange', () => {
             if (document.pointerLockElement === document.body) {
                 isPointerLocked = true;
                 document.getElementById('start-screen').classList.add('hidden');
+                document.getElementById('settings-modal').classList.add('hidden');
+                document.getElementById('tutorial-modal').classList.add('hidden');
+
                 if (!gameStarted) {
                     gameStarted = true;
                     startNextWave();
