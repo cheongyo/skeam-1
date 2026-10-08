@@ -2,864 +2,1578 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>스피드 쿠킹 마스터 (Speed Cooking Master)</title>
-    <!-- Tailwind CSS CDN for quick utility styling -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Cyberpunk FPS Survival - GitHub Edition</title>
+    <!-- Tailwind CSS for sleek UI overlay -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'Apple Color Emoji', 'Segoe UI Emoji', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            orange: '#FF6B4A',
-                            yellow: '#FFC837',
-                            green: '#2ECC71',
-                            red: '#E74C3C',
-                            dark: '#2C3E50',
-                            cream: '#FFF9F0'
-                        }
-                    },
-                    keyframes: {
-                        shake: {
-                            '0%, 100%': { transform: 'translateX(0)' },
-                            '20%, 60%': { transform: 'translateX(-8px)' },
-                            '40%, 80%': { transform: 'translateX(8px)' },
-                        },
-                        popIn: {
-                            '0%': { transform: 'scale(0.5) translateY(10px)', opacity: '0' },
-                            '70%': { transform: 'scale(1.1)' },
-                            '100%': { transform: 'scale(1) translateY(0)', opacity: '1' }
-                        },
-                        bounceSubtle: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-6px)' }
-                        },
-                        floatUp: {
-                            '0%': { transform: 'translateY(0) scale(1)', opacity: '1' },
-                            '100%': { transform: 'translateY(-40px) scale(1.2)', opacity: '0' }
-                        }
-                    },
-                    animation: {
-                        shake: 'shake 0.4s ease-in-out',
-                        popIn: 'popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                        bounceSubtle: 'bounceSubtle 1.8s infinite ease-in-out',
-                        floatUp: 'floatUp 0.8s ease-out forwards'
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Google Fonts for Cyberpunk aesthetic -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700;900&display=swap" rel="stylesheet">
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
     <style>
-        body {
-            background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%, #FECFEF 100%);
-            touch-action: manipulation;
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0d0614;
+            font-family: 'Rajdhani', sans-serif;
             user-select: none;
-            -webkit-user-select: none;
         }
 
-        .cooking-plate {
-            background: radial-gradient(circle, #ffffff 60%, #e2e8f0 100%);
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1), 0 8px 20px rgba(0,0,0,0.15);
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
         }
 
-        .speech-bubble {
-            position: relative;
-            background: #ffffff;
-            border-radius: 1.25rem;
+        #game-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
         }
 
-        .speech-bubble::after {
-            content: '';
+        /* Cyberpunk Scanline Effect Overlay */
+        .cyber-scanlines {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0, 240, 255, 0.04) 50%,
+                rgba(0, 240, 255, 0.04)
+            );
+            background-size: 100% 4px;
+        }
+
+        /* Neon Glow Effects */
+        .neon-glow-cyan {
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.8), 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+        .neon-glow-magenta {
+            text-shadow: 0 0 8px rgba(255, 0, 127, 0.8), 0 0 20px rgba(255, 0, 127, 0.5);
+        }
+
+        /* Scope overlay for Sniper rifle */
+        #sniper-scope {
+            background: radial-gradient(circle at center, transparent 35%, rgba(13, 6, 20, 0.96) 70%);
+            border: 2px solid rgba(255, 0, 127, 0.6);
+            display: none;
+        }
+
+        /* Crosshair Dynamic Lines */
+        .crosshair-line {
             position: absolute;
-            left: -12px;
-            top: 50%;
-            transform: translateY(-50%);
-            border-width: 8px 12px 8px 0;
-            border-style: solid;
-            border-color: transparent #ffffff transparent transparent;
+            background-color: rgba(0, 240, 255, 0.9);
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.9);
+            transition: transform 0.05s ease-out;
         }
 
-        .ing-btn {
-            transition: transform 0.08s ease, box-shadow 0.08s ease;
+        /* Vignette effect on low health or damage */
+        #damage-vignette {
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            background: radial-gradient(circle, transparent 50%, rgba(255, 0, 85, 0.6) 100%);
         }
 
-        .ing-btn:active {
-            transform: scale(0.92);
+        /* Floating Damage Text Animation */
+        .dmg-float {
+            position: absolute;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            color: #ff007f;
+            text-shadow: 0 0 10px #ff007f, 0 0 20px #00f0ff;
+            pointer-events: none;
+            animation: floatUp 0.6s ease-out forwards;
         }
 
-        /* Stacked visual ingredients styling */
-        .ingredient-layer {
-            transition: all 0.2s ease-out;
-            margin-top: -12px;
+        @keyframes floatUp {
+            0% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -120%) scale(0.8); opacity: 0; }
         }
 
-        .ingredient-layer:first-child {
-            margin-top: 0;
+        /* Toast Notifications */
+        .toast-item {
+            animation: slideIn 0.3s forwards, fadeOut 0.5s 2.5s forwards;
         }
 
-        /* Glassmorphism styling */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+        @keyframes slideIn {
+            from { transform: translateX(50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.05);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(0,0,0,0.2);
-            border-radius: 3px;
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-between p-2 sm:p-4 text-slate-800 font-sans">
+<body class="relative cyber-scanlines">
 
-    <!-- MAIN CONTAINER -->
-    <div id="gameContainer" class="w-full max-w-xl flex flex-col h-full flex-grow relative overflow-hidden my-auto">
-        
-        <!-- HEADER / DASHBOARD -->
-        <header class="glass-panel rounded-3xl p-3 sm:p-4 mb-3 shadow-lg flex flex-col gap-2">
-            <!-- Top info bar -->
-            <div class="flex items-center justify-between text-xs sm:text-sm font-bold text-slate-700">
-                <div class="flex items-center gap-1 bg-amber-100 text-amber-800 px-3 py-1 rounded-full border border-amber-300">
-                    <span>🏆 최고:</span>
-                    <span id="bestScoreText" class="text-amber-900 font-extrabold">0</span>
-                </div>
-                
-                <div class="flex items-center gap-1 bg-purple-100 text-purple-800 px-3 py-1 rounded-full border border-purple-300">
-                    <span>⭐ 레벨:</span>
-                    <span id="levelText" class="text-purple-900 font-extrabold">1</span>
-                </div>
+    <!-- 3D Render Canvas -->
+    <canvas id="game-canvas"></canvas>
 
-                <div class="flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full border border-blue-300">
-                    <span>🔥 콤보:</span>
-                    <span id="comboText" class="text-blue-900 font-extrabold">0</span>
-                </div>
-            </div>
+    <!-- Hurt / Damage Vignette -->
+    <div id="damage-vignette" class="absolute inset-0 opacity-0 pointer-events-none z-10"></div>
 
-            <!-- Score & Time Section -->
-            <div class="flex items-center justify-between gap-3">
-                <div class="flex flex-col">
-                    <span class="text-xs text-slate-500 font-semibold">현재 점수</span>
-                    <span id="scoreText" class="text-2xl sm:text-3xl font-black text-rose-500 tracking-tight">0</span>
-                </div>
+    <!-- Floating Damage Text Layer -->
+    <div id="damage-text-layer" class="absolute inset-0 pointer-events-none z-20"></div>
 
-                <!-- Timer Bar -->
-                <div class="flex-1 flex flex-col gap-1">
-                    <div class="flex justify-between items-center text-xs font-bold">
-                        <span class="text-slate-600">⏱️ 남은 시간</span>
-                        <span id="timerText" class="text-rose-600 font-extrabold">30.0s</span>
-                    </div>
-                    <div class="w-full bg-slate-200 h-4 rounded-full overflow-hidden p-0.5 shadow-inner">
-                        <div id="timerBar" class="bg-gradient-to-r from-emerald-400 to-green-500 h-full rounded-full transition-all duration-100 ease-linear" style="width: 100%;"></div>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <!-- MAIN GAMEPLAY AREA -->
-        <main class="flex-1 flex flex-col justify-between gap-3">
-            
-            <!-- CUSTOMER ORDER AREA -->
-            <section class="glass-panel rounded-3xl p-3 sm:p-4 shadow-lg flex items-center gap-3 relative">
-                <!-- Customer Avatar -->
-                <div class="flex flex-col items-center min-w-[64px]">
-                    <div id="customerAvatar" class="text-4xl sm:text-5xl animate-bounceSubtle filter drop-shadow-md">
-                        😋
-                    </div>
-                    <span id="customerTitle" class="text-[10px] font-bold text-slate-500 mt-1">손님</span>
-                </div>
-
-                <!-- Recipe Speech Bubble -->
-                <div class="speech-bubble flex-1 p-3 shadow-md border border-slate-100 flex flex-col justify-center min-h-[85px]">
-                    <div class="text-xs font-bold text-slate-400 mb-1 flex justify-between items-center">
-                        <span>주문 레시피 (순서대로!)</span>
-                        <span id="recipeCount" class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">0/0</span>
-                    </div>
-                    
-                    <!-- Recipe Items List -->
-                    <div id="recipeContainer" class="flex flex-wrap items-center gap-1.5 min-h-[36px]">
-                        <!-- Dynamically generated recipe cards -->
-                    </div>
-                </div>
-            </section>
-
-            <!-- COOKING PLATE / WORKSPACE -->
-            <section id="plateSection" class="glass-panel rounded-3xl p-3 sm:p-4 shadow-lg flex flex-col items-center justify-between relative min-h-[200px] sm:min-h-[220px]">
-                
-                <!-- Helper prompt -->
-                <div class="text-xs text-slate-400 font-medium mb-1">
-                    현재 플레이트 (아래 재료 버튼을 클릭하세요!)
-                </div>
-
-                <!-- Visual Plate Container -->
-                <div class="cooking-plate w-full max-w-[280px] sm:max-w-[320px] h-32 sm:h-36 rounded-full flex flex-col-reverse items-center justify-start p-3 relative overflow-visible border-4 border-white my-auto">
-                    <!-- Base Plate Effect -->
-                    <div class="absolute bottom-1 w-4/5 h-2 bg-slate-300 rounded-full blur-[1px] -z-10"></div>
-                    
-                    <!-- Ingredient Visual Stack -->
-                    <div id="plateIngredients" class="w-full flex flex-col-reverse items-center justify-center transition-all">
-                        <!-- Floating ingredient layers added dynamically -->
-                    </div>
-                </div>
-
-                <!-- Action Toolbar (Trash / Submit Visual Status) -->
-                <div class="w-full flex justify-between items-center mt-2 px-2">
-                    <button id="trashBtn" onclick="game.trashPlate()" class="flex items-center gap-1 bg-red-100 hover:bg-red-200 text-red-600 font-bold px-3 py-1.5 rounded-xl text-xs transition active:scale-95 border border-red-200">
-                        <span>🗑️ 레시피 비우기</span>
-                        <span class="text-[10px] text-red-400">(-1초)</span>
-                    </button>
-
-                    <div id="statusMessage" class="text-xs font-extrabold text-amber-600 h-5 flex items-center">
-                        <!-- Floating feedback like '+100', '오답!' -->
-                    </div>
-                </div>
-            </section>
-
-            <!-- INGREDIENT KEYPAD -->
-            <section class="glass-panel rounded-3xl p-3 shadow-lg">
-                <div class="text-xs font-bold text-slate-500 mb-2 px-1 flex justify-between items-center">
-                    <span>재료 선택 키패드</span>
-                    <span class="text-[10px] text-slate-400">클릭 또는 터치</span>
-                </div>
-
-                <!-- Ingredient Buttons Grid -->
-                <div id="ingredientGrid" class="grid grid-cols-4 sm:grid-cols-5 gap-2">
-                    <!-- Dynamic ingredient buttons inserted here -->
-                </div>
-            </section>
-        </main>
-
-        <!-- FOOTER & HELP -->
-        <footer class="mt-3 flex justify-between items-center text-xs text-slate-600 font-semibold px-2">
-            <button onclick="game.openGuideModal()" class="text-slate-700 hover:text-slate-900 underline flex items-center gap-1">
-                <span>📖 GitHub Pages 올리는 법</span>
-            </button>
-            <span>v1.0 Speed Cooking</span>
-        </footer>
+    <!-- Sniper Scope View Container -->
+    <div id="sniper-scope" class="absolute inset-0 pointer-events-none z-20 flex items-center justify-center">
+        <div class="relative w-[80vh] h-[80vh] rounded-full border-2 border-pink-500/70 flex items-center justify-center shadow-[0_0_30px_rgba(255,0,127,0.5)]">
+            <div class="w-full h-[1px] bg-cyan-400/80 absolute"></div>
+            <div class="h-full w-[1px] bg-cyan-400/80 absolute"></div>
+            <div class="w-28 h-28 rounded-full border border-pink-400/60 border-dashed animate-spin" style="animation-duration: 20s;"></div>
+            <div class="w-2 h-2 bg-pink-500 rounded-full absolute shadow-[0_0_8px_#ff007f]"></div>
+        </div>
     </div>
 
-    <!-- START / GAMEOVER OVERLAY MODAL -->
-    <div id="gameModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-50 transition-opacity">
-        <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-amber-100 flex flex-col items-center text-center animate-popIn">
-            
-            <div id="modalIcon" class="text-6xl mb-2">🍳</div>
-            <h2 id="modalTitle" class="text-2xl font-black text-slate-800 mb-1">스피드 쿠킹 마스터!</h2>
-            <p id="modalDescription" class="text-xs text-slate-500 mb-4 leading-relaxed">
-                주문서의 재료 순서대로 아래 버튼을 클릭하여 맛있는 요리를 빠르게 완성하세요!
-            </p>
+    <!-- Dynamic Crosshair HUD -->
+    <div id="crosshair" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20">
+        <div id="ch-top" class="crosshair-line w-[2px] h-[10px] -translate-x-1/2 -translate-y-[14px]"></div>
+        <div id="ch-bottom" class="crosshair-line w-[2px] h-[10px] -translate-x-1/2 translate-y-[4px]"></div>
+        <div id="ch-left" class="crosshair-line h-[2px] w-[10px] -translate-x-[14px] -translate-y-1/2"></div>
+        <div id="ch-right" class="crosshair-line h-[2px] w-[10px] translate-x-[4px] -translate-y-1/2"></div>
+        <div id="ch-dot" class="w-[4px] h-[4px] bg-cyan-300 rounded-full -translate-x-1/2 -translate-y-1/2 absolute shadow-[0_0_6px_#00f0ff]"></div>
+    </div>
 
-            <!-- Final Stats (Hidden on start) -->
-            <div id="modalStats" class="w-full bg-amber-50 rounded-2xl p-3 mb-4 hidden border border-amber-200">
-                <div class="grid grid-cols-2 gap-2 text-xs font-bold text-slate-700">
-                    <div class="bg-white p-2 rounded-xl shadow-sm">
-                        <div class="text-slate-400 text-[10px]">최종 점수</div>
-                        <div id="finalScore" class="text-lg text-rose-500 font-black">0</div>
-                    </div>
-                    <div class="bg-white p-2 rounded-xl shadow-sm">
-                        <div class="text-slate-400 text-[10px]">서빙 성공 요리</div>
-                        <div id="finalDishes" class="text-lg text-amber-600 font-black">0개</div>
-                    </div>
-                    <div class="bg-white p-2 rounded-xl shadow-sm">
-                        <div class="text-slate-400 text-[10px]">최고 콤보</div>
-                        <div id="finalMaxCombo" class="text-lg text-blue-600 font-black">0회</div>
-                    </div>
-                    <div class="bg-white p-2 rounded-xl shadow-sm">
-                        <div class="text-slate-400 text-[10px]">달성 레벨</div>
-                        <div id="finalLevel" class="text-lg text-purple-600 font-black">Lv.1</div>
-                    </div>
+    <!-- Hit Marker Indicator -->
+    <div id="hit-marker" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20 opacity-0 transition-opacity duration-100">
+        <div class="w-6 h-6 relative">
+            <div class="absolute w-2 h-[2px] bg-pink-500 rotate-45 top-0 left-0 shadow-[0_0_5px_#ff007f]"></div>
+            <div class="absolute w-2 h-[2px] bg-pink-500 -rotate-45 top-0 right-0 shadow-[0_0_5px_#ff007f]"></div>
+            <div class="absolute w-2 h-[2px] bg-pink-500 -rotate-45 bottom-0 left-0 shadow-[0_0_5px_#ff007f]"></div>
+            <div class="absolute w-2 h-[2px] bg-pink-500 rotate-45 bottom-0 right-0 shadow-[0_0_5px_#ff007f]"></div>
+        </div>
+    </div>
+
+    <!-- In-Game HUD Overlay -->
+    <div id="hud" class="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between p-6">
+        
+        <!-- Top Bar: Wave, Enemies, Score -->
+        <div class="flex justify-between items-start">
+            <!-- Player Stats Box -->
+            <div class="bg-purple-950/70 backdrop-blur-md border border-cyan-500/50 rounded-xl p-4 flex gap-6 text-white shadow-[0_0_20px_rgba(0,240,255,0.25)]">
+                <div>
+                    <div class="text-[11px] text-cyan-400 font-black uppercase tracking-widest">웨이브 (WAVE)</div>
+                    <div id="hud-wave" class="text-3xl font-orbitron font-black text-cyan-300 neon-glow-cyan">1</div>
+                </div>
+                <div class="border-r border-purple-800/80"></div>
+                <div>
+                    <div class="text-[11px] text-pink-400 font-black uppercase tracking-widest">남은 적 (ENEMIES)</div>
+                    <div id="hud-enemies" class="text-3xl font-orbitron font-black text-pink-400 neon-glow-magenta">0</div>
+                </div>
+                <div class="border-r border-purple-800/80"></div>
+                <div>
+                    <div class="text-[11px] text-yellow-400 font-black uppercase tracking-widest">점수 (SCORE)</div>
+                    <div id="hud-score" class="text-3xl font-orbitron font-black text-yellow-300 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]">0000</div>
+                </div>
+                <div class="border-r border-purple-800/80"></div>
+                <div>
+                    <div class="text-[11px] text-emerald-400 font-black uppercase tracking-widest">처치 (KILLS)</div>
+                    <div id="hud-kills" class="text-3xl font-orbitron font-black text-emerald-300 drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]">0</div>
                 </div>
             </div>
 
-            <!-- Start/Restart Button -->
-            <button id="startBtn" onclick="game.startGame()" class="w-full py-3.5 bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white font-extrabold text-lg rounded-2xl shadow-lg hover:shadow-orange-500/30 transition transform active:scale-95">
-                요리 시작하기! 🚀
+            <!-- Item Pickup Toast Container -->
+            <div id="toast-container" class="flex flex-col gap-2 items-end"></div>
+        </div>
+
+        <!-- Center Notification -->
+        <div class="text-center">
+            <div id="hud-notice" class="text-4xl font-orbitron font-black text-cyan-300 tracking-widest neon-glow-cyan opacity-0 transition-opacity duration-300">
+                CYBER WAVE 1 START
+            </div>
+            <div id="hud-reload" class="text-xl font-bold text-yellow-300 mt-2 tracking-wide hidden animate-bounce drop-shadow-[0_0_8px_#facc15]">
+                [R] 키를 눌러 재장전하세요!
+            </div>
+        </div>
+
+        <!-- Bottom Bar: Health, Weapons, Ammo -->
+        <div class="flex justify-between items-end">
+            
+            <!-- Health Bar Container -->
+            <div class="bg-purple-950/70 backdrop-blur-md border border-cyan-500/50 rounded-xl p-4 w-80 text-white shadow-[0_0_20px_rgba(0,240,255,0.2)]">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-xs font-black text-cyan-400 tracking-wider">CYBER CORE HEALTH</span>
+                    <span id="hud-hp-text" class="text-lg font-orbitron font-bold text-emerald-300 drop-shadow-[0_0_6px_#10b981]">100 / 100</span>
+                </div>
+                <div class="w-full bg-slate-950 rounded-full h-4 overflow-hidden p-0.5 border border-cyan-500/40">
+                    <div id="hud-hp-bar" class="bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 h-full rounded-full transition-all duration-200 shadow-[0_0_12px_#10b981]" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            <!-- Quick Weapon Selector Icons -->
+            <div class="flex gap-3 bg-purple-950/80 backdrop-blur-md p-2.5 rounded-2xl border border-pink-500/40 shadow-[0_0_25px_rgba(255,0,127,0.25)]">
+                <div id="wpn-btn-1" class="w-16 h-16 rounded-xl bg-cyan-950/90 border-2 border-cyan-400 flex flex-col items-center justify-center text-cyan-300 shadow-[0_0_12px_rgba(0,240,255,0.6)]">
+                    <span class="text-[10px] text-cyan-400 font-bold">1</span>
+                    <span class="text-xs font-black">권총</span>
+                </div>
+                <div id="wpn-btn-2" class="w-16 h-16 rounded-xl bg-slate-900/80 border border-slate-700 flex flex-col items-center justify-center text-slate-500">
+                    <span class="text-[10px] text-slate-500 font-bold">2</span>
+                    <span class="text-xs font-black">소총</span>
+                </div>
+                <div id="wpn-btn-3" class="w-16 h-16 rounded-xl bg-slate-900/80 border border-slate-700 flex flex-col items-center justify-center text-slate-500">
+                    <span class="text-[10px] text-slate-500 font-bold">3</span>
+                    <span class="text-xs font-black">샷건</span>
+                </div>
+                <div id="wpn-btn-4" class="w-16 h-16 rounded-xl bg-slate-900/80 border border-slate-700 flex flex-col items-center justify-center text-slate-500">
+                    <span class="text-[10px] text-slate-500 font-bold">4</span>
+                    <span class="text-xs font-black">저격총</span>
+                </div>
+            </div>
+
+            <!-- Ammo & Current Weapon Info -->
+            <div class="bg-purple-950/70 backdrop-blur-md border border-cyan-500/50 rounded-xl p-4 min-w-[220px] text-right text-white shadow-[0_0_20px_rgba(0,240,255,0.2)]">
+                <div id="hud-weapon-name" class="text-sm font-black text-pink-400 uppercase tracking-widest mb-1 neon-glow-magenta">PISTOL</div>
+                <div class="flex items-baseline justify-end gap-1 font-orbitron">
+                    <span id="hud-ammo-clip" class="text-4xl font-black text-cyan-300 neon-glow-cyan">12</span>
+                    <span class="text-2xl text-purple-400">/</span>
+                    <span id="hud-ammo-reserve" class="text-2xl text-pink-400">∞</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Screen Modal -->
+    <div id="start-screen" class="absolute inset-0 bg-purple-950/85 backdrop-blur-lg z-30 flex flex-col items-center justify-center text-white p-6">
+        <div class="max-w-xl text-center space-y-6">
+            <h1 class="text-6xl font-orbitron font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-500 to-purple-400 drop-shadow-[0_0_25px_rgba(0,240,255,0.8)]">
+                CYBER SURVIVOR 3D
+            </h1>
+            <p class="text-cyan-200 text-lg font-medium leading-relaxed">
+                밝게 빛나는 네온 사이버시티에 침입한 안드로이드 사이버병사들을 소탕하세요!<br>
+                필드 곳곳의 무기, 구급상자, 탄약 상자를 파밍하며 웨이브를 정복하세요.
+            </p>
+
+            <!-- Control Guide Box -->
+            <div class="bg-purple-900/50 border border-pink-500/40 rounded-xl p-5 text-left text-sm grid grid-cols-2 gap-3 text-cyan-100 shadow-[0_0_15px_rgba(255,0,127,0.2)]">
+                <div><span class="text-pink-400 font-bold">[W][A][S][D]</span> : 이동 / [Shift] 달리기</div>
+                <div><span class="text-pink-400 font-bold">[마우스 이동]</span> : 조준 및 시점 변경</div>
+                <div><span class="text-pink-400 font-bold">[좌클릭]</span> : 발사</div>
+                <div><span class="text-pink-400 font-bold">[우클릭]</span> : 저격 스코프 줌</div>
+                <div><span class="text-pink-400 font-bold">[1] [2] [3] [4]</span> : 무기 교체</div>
+                <div><span class="text-pink-400 font-bold">[R]</span> : 재장전 / <span class="text-pink-400 font-bold">[Space]</span> : 점프</div>
+            </div>
+
+            <button id="btn-start" class="px-10 py-4 bg-gradient-to-r from-cyan-500 via-pink-500 to-purple-600 rounded-2xl text-2xl font-orbitron font-black tracking-wider text-white shadow-[0_0_25px_rgba(0,240,255,0.6)] hover:shadow-[0_0_40px_rgba(255,0,127,0.9)] transition-all transform hover:scale-105 active:scale-95 border border-cyan-300/50">
+                CYBER START (시작)
             </button>
         </div>
     </div>
 
-    <!-- GITHUB PAGES GUIDE MODAL -->
-    <div id="guideModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-100 flex flex-col text-left max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-3">
-                <h3 class="text-lg font-extrabold text-slate-800 flex items-center gap-1.5">
-                    <span>🐙 GitHub Pages로 배포하는 방법</span>
-                </h3>
-                <button onclick="game.closeGuideModal()" class="text-slate-400 hover:text-slate-600 font-bold text-xl px-2">✕</button>
+    <!-- Game Over Screen -->
+    <div id="gameover-screen" class="absolute inset-0 bg-slate-950/90 backdrop-blur-lg z-30 flex flex-col items-center justify-center text-white p-6 hidden">
+        <div class="max-w-md text-center space-y-6">
+            <h2 class="text-6xl font-orbitron font-black text-pink-500 tracking-wider neon-glow-magenta">SYSTEM SHUTDOWN</h2>
+            <p id="gameover-reason" class="text-cyan-200">체력이 모두 고갈되었습니다.</p>
+            
+            <div class="bg-purple-950/80 border border-pink-500/50 rounded-xl p-6 text-left space-y-3 font-orbitron shadow-[0_0_20px_rgba(255,0,127,0.3)]">
+                <div class="flex justify-between">
+                    <span class="text-gray-400">도달 웨이브:</span>
+                    <span id="go-wave" class="text-cyan-400 font-bold text-xl">1</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">처치한 적:</span>
+                    <span id="go-kills" class="text-emerald-400 font-bold text-xl">0</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">최종 점수:</span>
+                    <span id="go-score" class="text-yellow-400 font-bold text-xl">0</span>
+                </div>
             </div>
 
-            <div class="text-xs text-slate-600 space-y-3 leading-relaxed">
-                <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200">
-                    <p class="font-bold text-slate-800 mb-1">1️⃣ 리포지토리 생성</p>
-                    <p>GitHub에 로그인한 뒤 <b>New Repository</b>를 눌러 새 저장소를 만듭니다. (예: <code class="bg-slate-200 px-1 rounded">speed-cooking</code>)</p>
-                </div>
-
-                <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200">
-                    <p class="font-bold text-slate-800 mb-1">2️⃣ index.html 파일 업로드</p>
-                    <p>현재 파일의 전체 코드를 복사하여 파일 이름을 반드시 <b><code class="text-rose-600 font-bold">index.html</code></b>로 생성한 뒤 업로드(Commit)하세요.</p>
-                </div>
-
-                <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200">
-                    <p class="font-bold text-slate-800 mb-1">3️⃣ GitHub Pages 활성화</p>
-                    <ol class="list-decimal list-inside space-y-0.5 mt-1">
-                        <li>리포지토리 <b>Settings</b> 탭 이동</li>
-                        <li>좌측 메뉴에서 <b>Pages</b> 클릭</li>
-                        <li>Build and deployment에서 Branch를 <b><code class="bg-slate-200 px-1 rounded">main</code></b> (또는 master)으로 선택 후 <b>Save</b></li>
-                    </ol>
-                </div>
-
-                <p class="text-emerald-600 font-bold text-center pt-1">
-                    🎉 약 1~2분 뒤 나만의 게임 웹사이트가 완성됩니다!
-                </p>
-            </div>
-
-            <button onclick="game.closeGuideModal()" class="mt-4 w-full py-2.5 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition">
-                확인
+            <button id="btn-restart" class="px-10 py-4 bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl text-2xl font-orbitron font-black tracking-wider text-white shadow-[0_0_25px_rgba(255,0,127,0.6)] hover:shadow-[0_0_40px_rgba(0,240,255,0.9)] transition-all transform hover:scale-105 active:scale-95 border border-pink-300/50">
+                REBOOT SYSTEM (재시작)
             </button>
         </div>
     </div>
 
     <script>
-        /**
-         * Web Audio API Sound Synthesizer
-         * External audio file independent implementation to prevent loading issues.
-         */
-        class SoundEngine {
-            constructor() {
-                this.ctx = null;
+    /* =========================================================================
+       1. WEB AUDIO API SYNTHESIZER
+       ========================================================================= */
+    class SoundEngine {
+        constructor() {
+            this.ctx = null;
+        }
+
+        init() {
+            if (!this.ctx) {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
             }
-
-            init() {
-                if (!this.ctx) {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    this.ctx = new AudioContext();
-                }
-                if (this.ctx.state === 'suspended') {
-                    this.ctx.resume();
-                }
-            }
-
-            // Click tone
-            playClick() {
-                this.init();
-                if (!this.ctx) return;
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(400, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.05);
-
-                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
-
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.05);
-            }
-
-            // Dish completed success chord
-            playSuccess() {
-                this.init();
-                if (!this.ctx) return;
-                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
-                notes.forEach((freq, index) => {
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime + index * 0.05);
-
-                    gain.gain.setValueAtTime(0, this.ctx.currentTime + index * 0.05);
-                    gain.gain.linearRampToValueAtTime(0.15, this.ctx.currentTime + index * 0.05 + 0.02);
-                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + index * 0.05 + 0.25);
-
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-
-                    osc.start(this.ctx.currentTime + index * 0.05);
-                    osc.stop(this.ctx.currentTime + index * 0.05 + 0.25);
-                });
-            }
-
-            // Error tone
-            playError() {
-                this.init();
-                if (!this.ctx) return;
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(160, this.ctx.currentTime);
-                osc.frequency.setValueAtTime(110, this.ctx.currentTime + 0.1);
-
-                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
-
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.25);
-            }
-
-            // Level up fanfare
-            playLevelUp() {
-                this.init();
-                if (!this.ctx) return;
-                const notes = [440, 554.37, 659.25, 880]; // A4, C#5, E5, A5
-                notes.forEach((freq, idx) => {
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.08);
-
-                    gain.gain.setValueAtTime(0.2, this.ctx.currentTime + idx * 0.08);
-                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.08 + 0.3);
-
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-
-                    osc.start(this.ctx.currentTime + idx * 0.08);
-                    osc.stop(this.ctx.currentTime + idx * 0.08 + 0.3);
-                });
-            }
-
-            // Game over tone
-            playGameOver() {
-                this.init();
-                if (!this.ctx) return;
-                const notes = [400, 350, 300, 220];
-                notes.forEach((freq, idx) => {
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.12);
-
-                    gain.gain.setValueAtTime(0.2, this.ctx.currentTime + idx * 0.12);
-                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.12 + 0.25);
-
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-
-                    osc.start(this.ctx.currentTime + idx * 0.12);
-                    osc.stop(this.ctx.currentTime + idx * 0.12 + 0.25);
-                });
+            if (this.ctx.state === 'suspended') {
+                this.ctx.resume();
             }
         }
 
-        // INGREDIENTS MASTER DATA
-        const INGREDIENTS = [
-            { id: 'bun_bottom', name: '아래빵', emoji: '🍞', color: 'bg-amber-100 border-amber-300 text-amber-900', levelReq: 1 },
-            { id: 'patty', name: '패티', emoji: '🥩', color: 'bg-amber-800 text-white border-amber-900', levelReq: 1 },
-            { id: 'cheese', name: '치즈', emoji: '🧀', color: 'bg-yellow-200 border-yellow-400 text-yellow-900', levelReq: 1 },
-            { id: 'lettuce', name: '양상추', emoji: '🥬', color: 'bg-emerald-100 border-emerald-300 text-emerald-900', levelReq: 1 },
-            { id: 'bun_top', name: '위빵', emoji: '🍞', color: 'bg-amber-200 border-amber-400 text-amber-900', levelReq: 1 },
-            { id: 'tomato', name: '토마토', emoji: '🍅', color: 'bg-rose-100 border-rose-300 text-rose-900', levelReq: 2 },
-            { id: 'pickle', name: '피클', emoji: '🥒', color: 'bg-green-100 border-green-300 text-green-900', levelReq: 2 },
-            { id: 'bacon', name: '베이컨', emoji: '🥓', color: 'bg-red-200 border-red-400 text-red-900', levelReq: 3 },
-            { id: 'egg', name: '계란후라이', emoji: '🍳', color: 'bg-amber-50 border-amber-200 text-amber-800', levelReq: 3 },
-            { id: 'sauce', name: '소스', emoji: '🧴', color: 'bg-orange-200 border-orange-400 text-orange-900', levelReq: 4 }
-        ];
+        playShot(freqStart, freqEnd, duration, type = 'sawtooth', volume = 0.3) {
+            if (!this.ctx) return;
+            try {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freqStart, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(Math.max(freqEnd, 10), this.ctx.currentTime + duration);
 
-        // CUSTOMERS AVATAR POOL
-        const CUSTOMERS = [
-            { emoji: '😋', title: '배고픈 고객' },
-            { emoji: '🧐', title: '미식가 고객' },
-            { emoji: '🐱', title: '야옹이 단골' },
-            { emoji: '🦊', title: '여우 손님' },
-            { emoji: '🐻', title: '곰 셰프' },
-            { emoji: '🐼', title: '푸바오 친구' },
-            { emoji: '👑', title: 'VIP 고객' }
-        ];
+                gain.gain.setValueAtTime(volume, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
 
-        /**
-         * Core Game Manager Class
-         */
-        class SpeedCookingGame {
-            constructor() {
-                this.sound = new SoundEngine();
-                
-                // State variables
-                this.score = 0;
-                this.bestScore = parseInt(localStorage.getItem('speed_cooking_best')) || 0;
-                this.level = 1;
-                this.combo = 0;
-                this.maxCombo = 0;
-                this.servedDishes = 0;
-                
-                this.timeLeft = 30.0;
-                this.maxTime = 30.0;
-                this.gameInterval = null;
-                this.isPlaying = false;
-
-                this.currentRecipe = [];
-                this.currentPlate = [];
-
-                // DOM Elements
-                this.dom = {
-                    score: document.getElementById('scoreText'),
-                    bestScore: document.getElementById('bestScoreText'),
-                    level: document.getElementById('levelText'),
-                    combo: document.getElementById('comboText'),
-                    timerText: document.getElementById('timerText'),
-                    timerBar: document.getElementById('timerBar'),
-                    recipeContainer: document.getElementById('recipeContainer'),
-                    recipeCount: document.getElementById('recipeCount'),
-                    plateIngredients: document.getElementById('plateIngredients'),
-                    ingredientGrid: document.getElementById('ingredientGrid'),
-                    customerAvatar: document.getElementById('customerAvatar'),
-                    customerTitle: document.getElementById('customerTitle'),
-                    statusMessage: document.getElementById('statusMessage'),
-                    plateSection: document.getElementById('plateSection'),
-                    gameModal: document.getElementById('gameModal'),
-                    modalIcon: document.getElementById('modalIcon'),
-                    modalTitle: document.getElementById('modalTitle'),
-                    modalDescription: document.getElementById('modalDescription'),
-                    modalStats: document.getElementById('modalStats'),
-                    finalScore: document.getElementById('finalScore'),
-                    finalDishes: document.getElementById('finalDishes'),
-                    finalMaxCombo: document.getElementById('finalMaxCombo'),
-                    finalLevel: document.getElementById('finalLevel'),
-                    startBtn: document.getElementById('startBtn'),
-                    guideModal: document.getElementById('guideModal')
-                };
-
-                this.updateBestScoreDisplay();
-                this.renderKeypad();
-            }
-
-            // Start or restart game
-            startGame() {
-                this.sound.init();
-                this.score = 0;
-                this.level = 1;
-                this.combo = 0;
-                this.maxCombo = 0;
-                this.servedDishes = 0;
-                this.timeLeft = 30.0;
-                this.maxTime = 30.0;
-                this.isPlaying = true;
-
-                this.dom.gameModal.classList.add('hidden');
-                
-                this.updateUI();
-                this.renderKeypad();
-                this.generateNewOrder();
-
-                if (this.gameInterval) clearInterval(this.gameInterval);
-                this.gameInterval = setInterval(() => this.tick(), 100);
-            }
-
-            // Main Timer Loop (100ms interval)
-            tick() {
-                if (!this.isPlaying) return;
-
-                this.timeLeft = Math.max(0, this.timeLeft - 0.1);
-                this.updateTimerDisplay();
-
-                if (this.timeLeft <= 0) {
-                    this.endGame();
-                }
-            }
-
-            // Game Over
-            endGame() {
-                this.isPlaying = false;
-                clearInterval(this.gameInterval);
-                this.sound.playGameOver();
-
-                // Save Best Score
-                if (this.score > this.bestScore) {
-                    this.bestScore = this.score;
-                    localStorage.setItem('speed_cooking_best', this.bestScore);
-                    this.updateBestScoreDisplay();
-                }
-
-                // Show Modal Stats
-                this.dom.modalIcon.textContent = '⏱️';
-                this.dom.modalTitle.textContent = '타임 오버!';
-                this.dom.modalDescription.textContent = '영업 시간이 종료되었습니다. 결과를 확인하세요!';
-                this.dom.finalScore.textContent = this.score.toLocaleString();
-                this.dom.finalDishes.textContent = `${this.servedDishes}개`;
-                this.dom.finalMaxCombo.textContent = `${this.maxCombo}회`;
-                this.dom.finalLevel.textContent = `Lv.${this.level}`;
-                
-                this.dom.modalStats.classList.remove('hidden');
-                this.dom.startBtn.textContent = '다시 도전하기 🔄';
-                this.dom.gameModal.classList.remove('hidden');
-            }
-
-            // Generate dynamic order based on current Level
-            generateNewOrder() {
-                this.currentPlate = [];
-                this.renderPlate();
-
-                // Filter available ingredients for current level
-                const availableIngs = INGREDIENTS.filter(i => i.levelReq <= this.level);
-                
-                // Recipe length scales with Level (Min 2, Max 6)
-                const minLength = Math.min(2 + Math.floor(this.level / 2), 4);
-                const maxLength = Math.min(3 + Math.floor(this.level / 1.5), 6);
-                const recipeLength = Math.floor(Math.random() * (maxLength - minLength + 1)) + minLength;
-
-                this.currentRecipe = [];
-                
-                // Rule: Usually start with bottom bun/toast if level 1, or random
-                const hasBuns = availableIngs.find(i => i.id === 'bun_bottom');
-                if (hasBuns && Math.random() > 0.3) {
-                    this.currentRecipe.push(hasBuns);
-                }
-
-                while (this.currentRecipe.length < recipeLength) {
-                    const randomIng = availableIngs[Math.floor(Math.random() * availableIngs.length)];
-                    this.currentRecipe.push(randomIng);
-                }
-
-                // Random Customer
-                const cust = CUSTOMERS[Math.floor(Math.random() * CUSTOMERS.length)];
-                this.dom.customerAvatar.textContent = cust.emoji;
-                this.dom.customerTitle.textContent = cust.title;
-
-                this.renderRecipe();
-            }
-
-            // Click Handler for Ingredients
-            addIngredient(ingId) {
-                if (!this.isPlaying) return;
-
-                const selectedIng = INGREDIENTS.find(i => i.id === ingId);
-                if (!selectedIng) return;
-
-                const stepIndex = this.currentPlate.length;
-                const expectedIng = this.currentRecipe[stepIndex];
-
-                // Real-time Step Validation
-                if (expectedIng && expectedIng.id === ingId) {
-                    // CORRECT STEP
-                    this.sound.playClick();
-                    this.currentPlate.push(selectedIng);
-                    this.renderPlate();
-                    this.renderRecipe(); // Update checkmarks
-
-                    // Check if Dish Completed
-                    if (this.currentPlate.length === this.currentRecipe.length) {
-                        this.handleDishSuccess();
-                    }
-                } else {
-                    // INCORRECT STEP -> PENALTY
-                    this.handleStepFailure();
-                }
-            }
-
-            // Dish completed successfully!
-            handleDishSuccess() {
-                this.sound.playSuccess();
-                this.servedDishes++;
-                this.combo++;
-                if (this.combo > this.maxCombo) this.maxCombo = this.combo;
-
-                // Base Score + Combo Bonus
-                const basePoints = this.currentRecipe.length * 50;
-                const comboBonus = (this.combo - 1) * 20;
-                const earnedScore = basePoints + comboBonus;
-                this.score += earnedScore;
-
-                // Bonus Time Reward (+3s to +5s depending on level)
-                const timeBonus = Math.max(3, 6 - Math.floor(this.level / 3));
-                this.timeLeft = Math.min(this.maxTime, this.timeLeft + timeBonus);
-
-                this.showFloatingText(`+${earnedScore}점! (+${timeBonus}초)`, 'text-emerald-600');
-
-                // Level Up Check (Every 3 dishes served)
-                if (this.servedDishes % 3 === 0 && this.level < 10) {
-                    this.level++;
-                    this.sound.playLevelUp();
-                    this.showFloatingText(`🎉 LEVEL UP! Lv.${this.level}`, 'text-purple-600 font-extrabold text-sm');
-                    this.renderKeypad(); // Unlock new ingredients if any
-                }
-
-                this.updateUI();
-
-                // Plate clear effect and next customer
-                setTimeout(() => {
-                    this.generateNewOrder();
-                }, 180);
-            }
-
-            // Step failure (Wrong ingredient selected)
-            handleStepFailure() {
-                this.sound.playError();
-                this.combo = 0; // Reset Combo
-                this.timeLeft = Math.max(0, this.timeLeft - 5.0); // Penalty -5 Seconds
-
-                // Screen shake & visual error feedback
-                this.dom.plateSection.classList.remove('animate-shake');
-                void this.dom.plateSection.offsetWidth; // Trigger reflow
-                this.dom.plateSection.classList.add('animate-shake');
-
-                this.showFloatingText('⚠️ 오답! (-5초)', 'text-rose-600 font-extrabold');
-                
-                // Clear plate on fail
-                this.currentPlate = [];
-                this.renderPlate();
-                this.renderRecipe();
-                this.updateUI();
-            }
-
-            // Trash Button Action
-            trashPlate() {
-                if (!this.isPlaying || this.currentPlate.length === 0) return;
-                
-                this.sound.playClick();
-                this.currentPlate = [];
-                this.combo = 0;
-                this.timeLeft = Math.max(0, this.timeLeft - 1.0); // Slight penalty -1s
-                
-                this.showFloatingText('버림 (-1초)', 'text-amber-600');
-                this.renderPlate();
-                this.renderRecipe();
-                this.updateUI();
-            }
-
-            // Render Order Recipe Items
-            renderRecipe() {
-                this.dom.recipeContainer.innerHTML = '';
-                this.dom.recipeCount.textContent = `${this.currentPlate.length}/${this.currentRecipe.length}`;
-
-                this.currentRecipe.forEach((ing, idx) => {
-                    const isDone = idx < this.currentPlate.length;
-                    const isCurrent = idx === this.currentPlate.length;
-
-                    const itemEl = document.createElement('div');
-                    itemEl.className = `flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-bold transition-all border ${
-                        isDone 
-                            ? 'bg-emerald-100 text-emerald-700 border-emerald-300 opacity-60 scale-95'
-                            : isCurrent
-                                ? 'bg-amber-100 text-amber-900 border-amber-400 ring-2 ring-amber-300 scale-105 animate-pulse'
-                                : 'bg-slate-100 text-slate-600 border-slate-200'
-                    }`;
-
-                    itemEl.innerHTML = `
-                        <span>${ing.emoji}</span>
-                        <span class="text-[11px]">${ing.name}</span>
-                        ${isDone ? '<span class="text-emerald-600 text-[10px]">✓</span>' : ''}
-                    `;
-
-                    this.dom.recipeContainer.appendChild(itemEl);
-                });
-            }
-
-            // Render Cooking Plate Stack
-            renderPlate() {
-                this.dom.plateIngredients.innerHTML = '';
-
-                this.currentPlate.forEach((ing) => {
-                    const layer = document.createElement('div');
-                    layer.className = `ingredient-layer w-4/5 py-1 px-3 rounded-2xl flex items-center justify-center gap-2 text-sm font-black shadow-md border animate-popIn ${ing.color}`;
-                    layer.innerHTML = `
-                        <span>${ing.emoji}</span>
-                        <span class="text-xs tracking-wider">${ing.name}</span>
-                    `;
-                    this.dom.plateIngredients.appendChild(layer);
-                });
-            }
-
-            // Render Keypad Buttons based on level
-            renderKeypad() {
-                this.dom.ingredientGrid.innerHTML = '';
-
-                INGREDIENTS.forEach((ing) => {
-                    const isUnlocked = ing.levelReq <= this.level;
-                    const btn = document.createElement('button');
-                    
-                    btn.className = `ing-btn p-2.5 sm:p-3 rounded-2xl flex flex-col items-center justify-center shadow-md border transition ${
-                        isUnlocked 
-                            ? 'bg-white hover:bg-amber-50 border-slate-200 active:scale-95 cursor-pointer'
-                            : 'bg-slate-100 border-slate-200 opacity-40 cursor-not-allowed'
-                    }`;
-
-                    btn.disabled = !isUnlocked;
-                    btn.onclick = () => this.addIngredient(ing.id);
-
-                    btn.innerHTML = `
-                        <span class="text-2xl sm:text-3xl mb-0.5 filter drop-shadow-sm">${ing.emoji}</span>
-                        <span class="text-[11px] font-extrabold text-slate-700">${ing.name}</span>
-                        ${!isUnlocked ? `<span class="text-[9px] text-purple-600 font-bold mt-0.5">Lv.${ing.levelReq}</span>` : ''}
-                    `;
-
-                    this.dom.ingredientGrid.appendChild(btn);
-                });
-            }
-
-            // Floating feedback animation
-            showFloatingText(text, colorClass) {
-                const msg = this.dom.statusMessage;
-                msg.className = `text-xs font-extrabold h-5 flex items-center animate-floatUp ${colorClass}`;
-                msg.textContent = text;
-
-                setTimeout(() => {
-                    if (msg.textContent === text) {
-                        msg.textContent = '';
-                    }
-                }, 800);
-            }
-
-            // Update Header Stats
-            updateUI() {
-                this.dom.score.textContent = this.score.toLocaleString();
-                this.dom.level.textContent = this.level;
-                this.dom.combo.textContent = this.combo;
-            }
-
-            // Update Timer Visual Bar
-            updateTimerDisplay() {
-                this.dom.timerText.textContent = `${this.timeLeft.toFixed(1)}s`;
-                const percentage = Math.max(0, (this.timeLeft / this.maxTime) * 100);
-                this.dom.timerBar.style.width = `${percentage}%`;
-
-                if (this.timeLeft < 7.0) {
-                    this.dom.timerBar.className = 'bg-gradient-to-r from-red-500 to-rose-600 h-full rounded-full transition-all duration-100 ease-linear animate-pulse';
-                } else {
-                    this.dom.timerBar.className = 'bg-gradient-to-r from-emerald-400 to-green-500 h-full rounded-full transition-all duration-100 ease-linear';
-                }
-            }
-
-            // Best score display update
-            updateBestScoreDisplay() {
-                this.dom.bestScore.textContent = this.bestScore.toLocaleString();
-            }
-
-            // Modal Controls
-            openGuideModal() {
-                this.dom.guideModal.classList.remove('hidden');
-            }
-
-            closeGuideModal() {
-                this.dom.guideModal.classList.add('hidden');
-            }
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + duration);
+            } catch (e) { console.error(e); }
         }
 
-        // Global Game Instance Initialization
-        let game = null;
+        playPistol() { this.playShot(450, 70, 0.12, 'sawtooth', 0.25); }
+        playRifle() { this.playShot(650, 90, 0.09, 'square', 0.2); }
+        playShotgun() { 
+            this.playShot(250, 30, 0.25, 'sawtooth', 0.4); 
+            this.playShot(180, 20, 0.3, 'square', 0.3);
+        }
+        playSniper() { this.playShot(1000, 50, 0.35, 'sawtooth', 0.5); }
 
-        window.onload = () => {
-            game = new SpeedCookingGame();
+        playHit() {
+            if (!this.ctx) return;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(900, this.ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(450, this.ctx.currentTime + 0.05);
+            gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + 0.05);
+        }
+
+        playKill() {
+            this.playShot(350, 1100, 0.2, 'triangle', 0.35);
+        }
+
+        playPickup() {
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(523.25, now);
+            osc.frequency.setValueAtTime(659.25, now + 0.08);
+            osc.frequency.setValueAtTime(783.99, now + 0.16);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(now + 0.3);
+        }
+
+        playReload() {
+            if (!this.ctx) return;
+            this.playShot(350, 600, 0.15, 'sine', 0.2);
+            setTimeout(() => this.playShot(600, 250, 0.15, 'sine', 0.2), 250);
+        }
+
+        playPlayerHurt() {
+            this.playShot(150, 40, 0.25, 'square', 0.45);
+        }
+    }
+
+    const soundEngine = new SoundEngine();
+
+    /* =========================================================================
+       2. GAME CONFIGURATION & WEAPON DEFINITIONS
+       ========================================================================= */
+    const WEAPONS = {
+        pistol: {
+            id: 'pistol',
+            name: '네온 권총 (Neon Pistol)',
+            damage: 35,
+            fireRate: 200,
+            clipSize: 12,
+            reserveAmmo: Infinity,
+            pellets: 1,
+            spread: 0.015,
+            color: 0x00f0ff,
+            recoil: 0.04,
+            shake: 0.03,
+            unlocked: true
+        },
+        rifle: {
+            id: 'rifle',
+            name: '플라즈마 소총 (Plasma Rifle)',
+            damage: 26,
+            fireRate: 90,
+            clipSize: 30,
+            reserveAmmo: 150,
+            pellets: 1,
+            spread: 0.025,
+            color: 0xff00ff,
+            recoil: 0.03,
+            shake: 0.02,
+            unlocked: false
+        },
+        shotgun: {
+            id: 'shotgun',
+            name: '사이즈믹 샷건 (Seismic Shotgun)',
+            damage: 22,
+            fireRate: 700,
+            clipSize: 8,
+            reserveAmmo: 40,
+            pellets: 7,
+            spread: 0.075,
+            color: 0xffaa00,
+            recoil: 0.12,
+            shake: 0.08,
+            unlocked: false
+        },
+        sniper: {
+            id: 'sniper',
+            name: '초고주파 저격총 (Hyper Sniper)',
+            damage: 150,
+            fireRate: 1000,
+            clipSize: 5,
+            reserveAmmo: 25,
+            pellets: 1,
+            spread: 0.001,
+            color: 0x00ffaa,
+            recoil: 0.2,
+            shake: 0.12,
+            unlocked: false
+        }
+    };
+
+    /* =========================================================================
+       3. THREE.JS SCENE SETUP & CYBERPUNK ENVIRONMENT (OPTIMIZED)
+       ========================================================================= */
+    let scene, camera, renderer;
+    let clock = new THREE.Clock();
+
+    const MAP_SIZE = 120;
+    const obstacles = [];
+    const obstacleMeshes = [];
+    const enemies = [];
+    const items = [];
+    const bullets = [];
+    const particles = [];
+    let gameStarted = false;
+
+    // Optimized Raycast Hitboxes Array to prevent searching full scene tree
+    const enemyHitboxes = [];
+
+    // Screen Shake variables
+    let screenShakeIntensity = 0;
+
+    const player = {
+        hp: 100,
+        maxHp: 100,
+        speed: 13,
+        sprintSpeed: 20,
+        position: new THREE.Vector3(0, 1.7, 0),
+        velocity: new THREE.Vector3(),
+        onGround: true,
+        currentWeaponKey: 'pistol',
+        ammo: {
+            pistol: { clip: 12, reserve: Infinity },
+            rifle: { clip: 30, reserve: 150 },
+            shotgun: { clip: 8, reserve: 40 },
+            sniper: { clip: 5, reserve: 25 }
+        },
+        isReloading: false,
+        isScoped: false,
+        canShoot: true,
+        kills: 0,
+        score: 0,
+        wave: 1
+    };
+
+    let isPointerLocked = false;
+    const keys = {};
+    let mouseSensitivity = 0.0022;
+
+    let gunContainer;
+    let muzzleLight;
+    const gunMeshes = {};
+
+    // Shared Materials & Geometries for high performance
+    const SHARED_GEOMETRIES = {
+        particle: new THREE.BoxGeometry(0.12, 0.12, 0.12),
+        hitbox: new THREE.BoxGeometry(1.2, 2.0, 1.2)
+    };
+    const SHARED_MATERIALS = {
+        cyanParticle: new THREE.MeshBasicMaterial({ color: 0x00f0ff }),
+        magentaParticle: new THREE.MeshBasicMaterial({ color: 0xff007f }),
+        yellowParticle: new THREE.MeshBasicMaterial({ color: 0xffaa00 }),
+        hitboxDebug: new THREE.MeshBasicMaterial({ visible: false })
+    };
+
+    function initScene() {
+        const canvas = document.getElementById('game-canvas');
+        scene = new THREE.Scene();
+
+        scene.background = new THREE.Color(0x0a0515);
+        scene.fog = new THREE.FogExp2(0x0a0515, 0.006);
+
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 400);
+        camera.position.copy(player.position);
+
+        renderer = new THREE.WebGLRenderer({ 
+            canvas, 
+            antialias: true, 
+            powerPreference: "high-performance" 
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        // Lock pixel ratio to max 1.25 for lag-free performance on all screens
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
+        
+        // Optimize Shadow map size and rendering
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.BasicShadowMap;
+
+        // Bright Cyberpunk Lighting
+        const ambientLight = new THREE.AmbientLight(0x9d4edd, 1.4);
+        scene.add(ambientLight);
+
+        const hemiLight = new THREE.HemisphereLight(0x00f0ff, 0xff007f, 1.3);
+        hemiLight.position.set(0, 50, 0);
+        scene.add(hemiLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.8);
+        dirLight.position.set(30, 50, 20);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 1024;
+        dirLight.shadow.mapSize.height = 1024;
+        dirLight.shadow.camera.near = 1;
+        dirLight.shadow.camera.far = 120;
+        dirLight.shadow.camera.left = -50;
+        dirLight.shadow.camera.right = 50;
+        dirLight.shadow.camera.top = 50;
+        dirLight.shadow.camera.bottom = -50;
+        scene.add(dirLight);
+
+        buildCyberEnvironment();
+
+        // Gun Container & Muzzle Light
+        gunContainer = new THREE.Group();
+        
+        muzzleLight = new THREE.PointLight(0x00f0ff, 0, 8);
+        muzzleLight.position.set(0.2, -0.1, -0.6);
+        gunContainer.add(muzzleLight);
+
+        camera.add(gunContainer);
+        scene.add(camera);
+
+        create3DWeaponModels();
+        switchWeapon('pistol');
+
+        spawnMapCoverAndItems();
+    }
+
+    function buildCyberEnvironment() {
+        const canvasTile = document.createElement('canvas');
+        canvasTile.width = 256;
+        canvasTile.height = 256;
+        const ctx = canvasTile.getContext('2d');
+
+        ctx.fillStyle = '#100720';
+        ctx.fillRect(0, 0, 256, 256);
+
+        ctx.strokeStyle = '#ff007f';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(0, 0, 256, 256);
+
+        ctx.strokeStyle = '#00f0ff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(128, 0); ctx.lineTo(128, 256);
+        ctx.moveTo(0, 128); ctx.lineTo(256, 128);
+        ctx.stroke();
+
+        const floorTexture = new THREE.CanvasTexture(canvasTile);
+        floorTexture.wrapS = THREE.RepeatWrapping;
+        floorTexture.wrapT = THREE.RepeatWrapping;
+        floorTexture.repeat.set(MAP_SIZE / 4, MAP_SIZE / 4);
+
+        const floorGeo = new THREE.PlaneGeometry(MAP_SIZE, MAP_SIZE);
+        const floorMat = new THREE.MeshStandardMaterial({
+            map: floorTexture,
+            roughness: 0.3,
+            metalness: 0.3
+        });
+        const floor = new THREE.Mesh(floorGeo, floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        // Neon Boundary Walls
+        const wallMat = new THREE.MeshStandardMaterial({ 
+            color: 0x1e0e38, 
+            emissive: 0x00f0ff, 
+            emissiveIntensity: 0.15,
+            roughness: 0.5 
+        });
+        const wallHeight = 12;
+        const halfSize = MAP_SIZE / 2;
+
+        const walls = [
+            { size: [MAP_SIZE, wallHeight, 1], pos: [0, wallHeight / 2, -halfSize] },
+            { size: [MAP_SIZE, wallHeight, 1], pos: [0, wallHeight / 2, halfSize] },
+            { size: [1, wallHeight, MAP_SIZE], pos: [-halfSize, wallHeight / 2, 0] },
+            { size: [1, wallHeight, MAP_SIZE], pos: [halfSize, wallHeight / 2, 0] }
+        ];
+
+        walls.forEach(w => {
+            const wallMesh = new THREE.Mesh(new THREE.BoxGeometry(...w.size), wallMat);
+            wallMesh.position.set(...w.pos);
+            wallMesh.receiveShadow = true;
+            wallMesh.castShadow = true;
+            scene.add(wallMesh);
+
+            obstacles.push(new THREE.Box3().setFromObject(wallMesh));
+            obstacleMeshes.push(wallMesh);
+        });
+    }
+
+    /* =========================================================================
+       4. PROCEDURAL 3D WEAPON MODELS
+       ========================================================================= */
+    function create3DWeaponModels() {
+        const darkMetal = new THREE.MeshStandardMaterial({ color: 0x1a1a2e, metalness: 0.9, roughness: 0.2 });
+        const cyanNeon = new THREE.MeshStandardMaterial({ color: 0x00f0ff, emissive: 0x00f0ff, emissiveIntensity: 1.0 });
+        const magentaNeon = new THREE.MeshStandardMaterial({ color: 0xff007f, emissive: 0xff007f, emissiveIntensity: 1.0 });
+
+        // --- 1. PISTOL ---
+        const pistolGrp = new THREE.Group();
+        const pBody = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.12, 0.3), darkMetal);
+        const pStrip = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.02, 0.28), cyanNeon);
+        pStrip.position.y = 0.06;
+        const pBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.35), darkMetal);
+        pBarrel.rotation.x = Math.PI / 2;
+        pBarrel.position.set(0, 0.04, -0.1);
+
+        pistolGrp.add(pBody, pStrip, pBarrel);
+        pistolGrp.position.set(0.22, -0.22, -0.45);
+        gunContainer.add(pistolGrp);
+        gunMeshes.pistol = pistolGrp;
+
+        // --- 2. RIFLE ---
+        const rifleGrp = new THREE.Group();
+        const rBody = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.14, 0.6), darkMetal);
+        const rStrip = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.03, 0.5), magentaNeon);
+        rStrip.position.y = 0.07;
+        const rBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.5), darkMetal);
+        rBarrel.rotation.x = Math.PI / 2;
+        rBarrel.position.set(0, 0.02, -0.4);
+
+        rifleGrp.add(rBody, rStrip, rBarrel);
+        rifleGrp.position.set(0.24, -0.25, -0.55);
+        gunContainer.add(rifleGrp);
+        gunMeshes.rifle = rifleGrp;
+
+        // --- 3. SHOTGUN ---
+        const shotgunGrp = new THREE.Group();
+        const sBody = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.15, 0.55), darkMetal);
+        const sNeon = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.04, 0.3), cyanNeon);
+        sNeon.position.set(0, 0.07, -0.1);
+        const sBarrel1 = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.5), darkMetal);
+        sBarrel1.rotation.x = Math.PI / 2;
+        sBarrel1.position.set(-0.03, 0.03, -0.4);
+        const sBarrel2 = sBarrel1.clone();
+        sBarrel2.position.x = 0.03;
+
+        shotgunGrp.add(sBody, sNeon, sBarrel1, sBarrel2);
+        shotgunGrp.position.set(0.25, -0.25, -0.5);
+        gunContainer.add(shotgunGrp);
+        gunMeshes.shotgun = shotgunGrp;
+
+        // --- 4. SNIPER ---
+        const sniperGrp = new THREE.Group();
+        const snBody = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.16, 0.8), darkMetal);
+        const snBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.8), darkMetal);
+        snBarrel.rotation.x = Math.PI / 2;
+        snBarrel.position.set(0, 0.03, -0.65);
+        const snScope = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.3), magentaNeon);
+        snScope.rotation.x = Math.PI / 2;
+        snScope.position.set(0, 0.12, -0.1);
+
+        sniperGrp.add(snBody, snBarrel, snScope);
+        sniperGrp.position.set(0.26, -0.24, -0.6);
+        gunContainer.add(sniperGrp);
+        gunMeshes.sniper = sniperGrp;
+
+        Object.keys(gunMeshes).forEach(k => gunMeshes[k].visible = false);
+    }
+
+    function switchWeapon(key) {
+        if (!WEAPONS[key] || !WEAPONS[key].unlocked) return;
+        player.currentWeaponKey = key;
+
+        Object.keys(gunMeshes).forEach(k => {
+            gunMeshes[k].visible = (k === key);
+        });
+
+        if (player.isScoped) toggleScope(false);
+        updateHUD();
+    }
+
+    /* =========================================================================
+       5. MAP COVER & ITEM PICKUP SPAWNING
+       ========================================================================= */
+    function spawnMapCoverAndItems() {
+        const boxGeo = new THREE.BoxGeometry(3.5, 3.5, 3.5);
+        const boxMat = new THREE.MeshStandardMaterial({ 
+            color: 0x251342, 
+            emissive: 0xff007f, 
+            emissiveIntensity: 0.2,
+            roughness: 0.4 
+        });
+
+        for (let i = 0; i < 20; i++) {
+            const box = new THREE.Mesh(boxGeo, boxMat);
+            const x = (Math.random() - 0.5) * (MAP_SIZE - 25);
+            const z = (Math.random() - 0.5) * (MAP_SIZE - 25);
+            if (Math.hypot(x, z) < 10) continue;
+
+            box.position.set(x, 1.75, z);
+            box.castShadow = true;
+            box.receiveShadow = true;
+            scene.add(box);
+
+            obstacles.push(new THREE.Box3().setFromObject(box));
+            obstacleMeshes.push(box);
+        }
+
+        spawnWeaponPickup('rifle', -18, -18);
+        spawnWeaponPickup('shotgun', 18, -18);
+        spawnWeaponPickup('sniper', 0, 25);
+
+        spawnItem('medkit', -12, 12);
+        spawnItem('medkit', 12, -12);
+        spawnItem('ammo', 15, 15);
+        spawnItem('ammo', -15, -15);
+    }
+
+    function spawnItem(type, x, z) {
+        const group = new THREE.Group();
+        group.position.set(x, 1.2, z);
+
+        let mesh, lightColor;
+        if (type === 'medkit') {
+            lightColor = 0x00f0ff;
+            mesh = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.9, 0.9), new THREE.MeshStandardMaterial({ color: 0x0f172a, emissive: 0x00f0ff, emissiveIntensity: 0.6 }));
+            const cross1 = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.2, 0.92), new THREE.MeshBasicMaterial({ color: 0x10b981 }));
+            const cross2 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.6, 0.92), new THREE.MeshBasicMaterial({ color: 0x10b981 }));
+            mesh.add(cross1, cross2);
+        } else {
+            lightColor = 0xffaa00;
+            mesh = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.7, 0.7), new THREE.MeshStandardMaterial({ color: 0x311b92, emissive: 0xffaa00, emissiveIntensity: 0.7 }));
+        }
+
+        group.add(mesh);
+
+        const pointLight = new THREE.PointLight(lightColor, 2, 6);
+        pointLight.position.set(0, 0.8, 0);
+        group.add(pointLight);
+
+        scene.add(group);
+        items.push({ group, type, x, z, active: true });
+    }
+
+    function spawnWeaponPickup(weaponKey, x, z) {
+        const group = new THREE.Group();
+        group.position.set(x, 1.4, z);
+
+        const baseMat = new THREE.MeshStandardMaterial({ color: 0xff007f, emissive: 0xff007f, emissiveIntensity: 0.8 });
+        const ring = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 0.15, 16), baseMat);
+        ring.position.y = -0.9;
+        group.add(ring);
+
+        const light = new THREE.PointLight(0xff007f, 2.5, 7);
+        group.add(light);
+
+        scene.add(group);
+        items.push({ group, type: 'weapon', weaponKey, x, z, active: true });
+    }
+
+    /* =========================================================================
+       6. HUMANOID CYBER SOLDIER ENEMY AI & WAVE SYSTEM
+       ========================================================================= */
+    function startNextWave() {
+        showNotice(`CYBER WAVE ${player.wave} START`);
+        const enemyCount = 5 + (player.wave - 1) * 3;
+
+        for (let i = 0; i < enemyCount; i++) {
+            setTimeout(() => {
+                if (gameStarted) spawnEnemy();
+            }, i * 350);
+        }
+        updateHUD();
+    }
+
+    function createHumanoidCyberSoldier() {
+        const group = new THREE.Group();
+
+        // Shared materials
+        const armorMat = new THREE.MeshStandardMaterial({ color: 0x180b2a, roughness: 0.3, metalness: 0.8 });
+        const jointMat = new THREE.MeshStandardMaterial({ color: 0x0a0412, roughness: 0.5 });
+        const visorMat = new THREE.MeshStandardMaterial({ color: 0xff007f, emissive: 0xff007f, emissiveIntensity: 1.5 });
+        const coreMat = new THREE.MeshStandardMaterial({ color: 0x00f0ff, emissive: 0x00f0ff, emissiveIntensity: 1.5 });
+
+        // --- TORSO ---
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.8, 0.4), armorMat);
+        torso.position.y = 1.3;
+        torso.castShadow = true;
+        group.add(torso);
+
+        // Core Reactor
+        const core = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 8), coreMat);
+        core.position.set(0, 1.35, 0.21);
+        group.add(core);
+
+        // --- HEAD ---
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.42, 0.4), armorMat);
+        head.position.y = 1.95;
+        head.castShadow = true;
+        group.add(head);
+
+        // Glowing Cyber Visor
+        const visor = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.12, 0.1), visorMat);
+        visor.position.set(0, 1.98, 0.21);
+        group.add(visor);
+
+        // --- ARMS & LEGS GROUPS (For Walking Animation) ---
+        // Left Arm Group
+        const leftArmGroup = new THREE.Group();
+        leftArmGroup.position.set(-0.48, 1.6, 0);
+        const leftShoulder = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.2), armorMat);
+        const leftArm = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.6, 0.18), armorMat);
+        leftArm.position.y = -0.3;
+        leftArmGroup.add(leftShoulder, leftArm);
+        group.add(leftArmGroup);
+
+        // Right Arm Group (Holding Cyber Gun)
+        const rightArmGroup = new THREE.Group();
+        rightArmGroup.position.set(0.48, 1.6, 0);
+        const rightShoulder = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.2), armorMat);
+        const rightArm = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.6, 0.18), armorMat);
+        rightArm.position.y = -0.3;
+        const enemyGun = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.15, 0.45), jointMat);
+        enemyGun.position.set(0, -0.5, 0.2);
+        rightArmGroup.add(rightShoulder, rightArm, enemyGun);
+        group.add(rightArmGroup);
+
+        // Left Leg Group
+        const leftLegGroup = new THREE.Group();
+        leftLegGroup.position.set(-0.2, 0.9, 0);
+        const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.8, 0.22), armorMat);
+        leftLeg.position.y = -0.4;
+        leftLegGroup.add(leftLeg);
+        group.add(leftLegGroup);
+
+        // Right Leg Group
+        const rightLegGroup = new THREE.Group();
+        rightLegGroup.position.set(0.2, 0.9, 0);
+        const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.8, 0.22), armorMat);
+        rightLeg.position.y = -0.4;
+        rightLegGroup.add(rightLeg);
+        group.add(rightLegGroup);
+
+        // Invisible Raycast Hitbox Mesh for Fast Collision Check
+        const hitbox = new THREE.Mesh(SHARED_GEOMETRIES.hitbox, SHARED_MATERIALS.hitboxDebug);
+        hitbox.position.y = 1.0;
+        group.add(hitbox);
+
+        return {
+            group,
+            hitbox,
+            leftArmGroup,
+            rightArmGroup,
+            leftLegGroup,
+            rightLegGroup,
+            armorMat
         };
+    }
+
+    function spawnEnemy() {
+        const humanoid = createHumanoidCyberSoldier();
+        const group = humanoid.group;
+
+        // Random edge spawn position
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 30 + Math.random() * 20;
+        group.position.set(Math.cos(angle) * dist, 0, Math.sin(angle) * dist);
+
+        scene.add(group);
+
+        const maxHp = 60 + (player.wave - 1) * 25;
+        const enemyObj = {
+            mesh: group,
+            hitbox: humanoid.hitbox,
+            leftArm: humanoid.leftArmGroup,
+            rightArm: humanoid.rightArmGroup,
+            leftLeg: humanoid.leftLegGroup,
+            rightLeg: humanoid.rightLegGroup,
+            armorMat: humanoid.armorMat,
+            hp: maxHp,
+            maxHp: maxHp,
+            speed: 5 + Math.min(player.wave * 0.5, 8),
+            lastShot: 0,
+            shootInterval: Math.max(1800 - player.wave * 100, 700),
+            damage: 12 + player.wave * 2,
+            animOffset: Math.random() * 10
+        };
+
+        // Bind reference back for raycasting
+        humanoid.hitbox.userData.enemyRef = enemyObj;
+
+        enemies.push(enemyObj);
+        enemyHitboxes.push(humanoid.hitbox);
+
+        updateHUD();
+    }
+
+    /* =========================================================================
+       7. PLAYER MOVEMENT & CONTROLS
+       ========================================================================= */
+    const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+
+    function setupControls() {
+        document.addEventListener('keydown', (e) => {
+            keys[e.code] = true;
+            if (e.code === 'KeyR') reloadWeapon();
+            if (e.code === 'Digit1') switchWeapon('pistol');
+            if (e.code === 'Digit2') switchWeapon('rifle');
+            if (e.code === 'Digit3') switchWeapon('shotgun');
+            if (e.code === 'Digit4') switchWeapon('sniper');
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.code] = false;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isPointerLocked) return;
+
+            const sens = player.isScoped ? mouseSensitivity * 0.3 : mouseSensitivity;
+            euler.y -= e.movementX * sens;
+            euler.x -= e.movementY * sens;
+            euler.x = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, euler.x));
+
+            camera.quaternion.setFromEuler(euler);
+        });
+
+        document.addEventListener('mousedown', (e) => {
+            if (!isPointerLocked) return;
+            if (e.button === 0) shoot();
+            if (e.button === 2) {
+                if (player.currentWeaponKey === 'sniper') {
+                    toggleScope(!player.isScoped);
+                }
+            }
+        });
+
+        document.addEventListener('contextmenu', e => e.preventDefault());
+    }
+
+    function toggleScope(enable) {
+        player.isScoped = enable;
+        const scopeUI = document.getElementById('sniper-scope');
+        const crosshair = document.getElementById('crosshair');
+
+        if (enable) {
+            scopeUI.style.display = 'flex';
+            crosshair.style.opacity = '0';
+            camera.fov = 22;
+        } else {
+            scopeUI.style.display = 'none';
+            crosshair.style.opacity = '1';
+            camera.fov = 75;
+        }
+        camera.updateProjectionMatrix();
+    }
+
+    function updatePlayerPhysics(delta) {
+        if (!isPointerLocked) return;
+
+        const moveSpeed = keys['ShiftLeft'] ? player.sprintSpeed : player.speed;
+        const moveVec = new THREE.Vector3();
+
+        if (keys['KeyW']) moveVec.z -= 1;
+        if (keys['KeyS']) moveVec.z += 1;
+        if (keys['KeyA']) moveVec.x -= 1;
+        if (keys['KeyD']) moveVec.x += 1;
+
+        moveVec.normalize();
+        moveVec.applyEuler(new THREE.Euler(0, euler.y, 0));
+
+        player.velocity.x = moveVec.x * moveSpeed;
+        player.velocity.z = moveVec.z * moveSpeed;
+
+        if (keys['Space'] && player.onGround) {
+            player.velocity.y = 8.5;
+            player.onGround = false;
+        }
+
+        player.velocity.y -= 24 * delta;
+
+        const nextPos = player.position.clone().addScaledVector(player.velocity, delta);
+
+        const halfMap = MAP_SIZE / 2 - 1.5;
+        let collideX = Math.abs(nextPos.x) > halfMap;
+        let collideZ = Math.abs(nextPos.z) > halfMap;
+
+        if (!collideX) player.position.x = nextPos.x;
+        if (!collideZ) player.position.z = nextPos.z;
+
+        player.position.y += player.velocity.y * delta;
+
+        if (player.position.y <= 1.7) {
+            player.position.y = 1.7;
+            player.velocity.y = 0;
+            player.onGround = true;
+        }
+
+        camera.position.copy(player.position);
+
+        // Add Camera Screen Shake recoil effect
+        if (screenShakeIntensity > 0) {
+            camera.position.x += (Math.random() - 0.5) * screenShakeIntensity;
+            camera.position.y += (Math.random() - 0.5) * screenShakeIntensity;
+            screenShakeIntensity = Math.max(0, screenShakeIntensity - delta * 0.4);
+        }
+
+        // Weapon Sway / Bobbing
+        const speedMagnitude = Math.hypot(player.velocity.x, player.velocity.z);
+        if (speedMagnitude > 1 && player.onGround) {
+            const time = clock.getElapsedTime() * 12;
+            gunContainer.position.y = Math.sin(time) * 0.015;
+            gunContainer.position.x = Math.cos(time * 0.5) * 0.015;
+        } else {
+            gunContainer.position.set(0, 0, 0);
+        }
+
+        checkItemPickups();
+    }
+
+    /* =========================================================================
+       8. HIGH-PERFORMANCE WEAPON SHOOTING & EFFECTS
+       ========================================================================= */
+    function shoot() {
+        if (!player.canShoot || player.isReloading) return;
+
+        const wpn = WEAPONS[player.currentWeaponKey];
+        const ammoInfo = player.ammo[player.currentWeaponKey];
+
+        if (ammoInfo.clip <= 0) {
+            document.getElementById('hud-reload').classList.remove('hidden');
+            soundEngine.playHit();
+            return;
+        }
+
+        player.canShoot = false;
+        ammoInfo.clip--;
+        updateHUD();
+
+        if (player.currentWeaponKey === 'pistol') soundEngine.playPistol();
+        else if (player.currentWeaponKey === 'rifle') soundEngine.playRifle();
+        else if (player.currentWeaponKey === 'shotgun') soundEngine.playShotgun();
+        else if (player.currentWeaponKey === 'sniper') soundEngine.playSniper();
+
+        // Gun Kickback & Screen Shake
+        gunContainer.position.z += wpn.recoil;
+        screenShakeIntensity = wpn.shake;
+        setTimeout(() => gunContainer.position.z = 0, 70);
+
+        // Muzzle Flash
+        muzzleLight.intensity = 3.5;
+        setTimeout(() => muzzleLight.intensity = 0, 40);
+
+        expandCrosshair();
+
+        for (let i = 0; i < wpn.pellets; i++) {
+            fireOptimizedRaycastBullet(wpn);
+        }
+
+        setTimeout(() => {
+            player.canShoot = true;
+        }, wpn.fireRate);
+    }
+
+    function fireOptimizedRaycastBullet(wpn) {
+        const raycaster = new THREE.Raycaster();
+        
+        const spreadX = (Math.random() - 0.5) * wpn.spread;
+        const spreadY = (Math.random() - 0.5) * wpn.spread;
+        const rayDir = new THREE.Vector3(spreadX, spreadY, -1).unproject(camera).sub(camera.position).normalize();
+
+        raycaster.set(camera.position, rayDir);
+
+        // FAST OPTIMIZED RAYCASTING: Only check active enemy hitboxes and map obstacle meshes!
+        const targetsToTest = [...enemyHitboxes, ...obstacleMeshes];
+        const intersects = raycaster.intersectObjects(targetsToTest, false);
+
+        let hitPoint = camera.position.clone().addScaledVector(rayDir, 65);
+
+        if (intersects.length > 0) {
+            const hit = intersects[0];
+            hitPoint = hit.point;
+
+            const hitEnemyObj = hit.object.userData.enemyRef;
+
+            if (hitEnemyObj) {
+                damageEnemy(hitEnemyObj, wpn.damage);
+                showHitMarker();
+                showFloatingDamageText(hitPoint, wpn.damage);
+            } else {
+                spawnImpactParticles(hitPoint, 0x00f0ff, 4);
+            }
+        }
+
+        createTracerBeam(camera.position.clone().add(new THREE.Vector3(0.2, -0.2, -0.4).applyQuaternion(camera.quaternion)), hitPoint, wpn.color);
+    }
+
+    function createTracerBeam(from, to, colorHex) {
+        const material = new THREE.LineBasicMaterial({ color: colorHex, transparent: true, opacity: 0.9 });
+        const geometry = new THREE.BufferGeometry().setFromPoints([from, to]);
+        const line = new THREE.Line(geometry, material);
+        scene.add(line);
+
+        setTimeout(() => {
+            scene.remove(line);
+            geometry.dispose();
+            material.dispose();
+        }, 40);
+    }
+
+    function damageEnemy(enemy, amount) {
+        enemy.hp -= amount;
+        soundEngine.playHit();
+
+        // Flash enemy body
+        enemy.armorMat.emissive.setHex(0xff007f);
+        enemy.armorMat.emissiveIntensity = 0.8;
+        setTimeout(() => {
+            if (enemy) {
+                enemy.armorMat.emissive.setHex(0x000000);
+                enemy.armorMat.emissiveIntensity = 0;
+            }
+        }, 80);
+
+        spawnImpactParticles(enemy.mesh.position.clone().add(new THREE.Vector3(0, 1.4, 0)), 0xff007f, 6);
+
+        if (enemy.hp <= 0) {
+            soundEngine.playKill();
+            
+            // Explosion particles on enemy destruction
+            spawnImpactParticles(enemy.mesh.position.clone().add(new THREE.Vector3(0, 1.2, 0)), 0x00f0ff, 18);
+            spawnImpactParticles(enemy.mesh.position.clone().add(new THREE.Vector3(0, 1.2, 0)), 0xff007f, 18);
+
+            scene.remove(enemy.mesh);
+
+            const index = enemies.indexOf(enemy);
+            if (index > -1) enemies.splice(index, 1);
+
+            const hbIndex = enemyHitboxes.indexOf(enemy.hitbox);
+            if (hbIndex > -1) enemyHitboxes.splice(hbIndex, 1);
+
+            player.kills++;
+            player.score += 250;
+
+            if (Math.random() < 0.5) {
+                const dropType = Math.random() < 0.5 ? 'medkit' : 'ammo';
+                spawnItem(dropType, enemy.mesh.position.x, enemy.mesh.position.z);
+            }
+
+            if (enemies.length === 0) {
+                player.wave++;
+                player.score += 700;
+                setTimeout(startNextWave, 1200);
+            }
+
+            updateHUD();
+        }
+    }
+
+    function reloadWeapon() {
+        if (player.isReloading) return;
+        const wpn = WEAPONS[player.currentWeaponKey];
+        const ammoInfo = player.ammo[player.currentWeaponKey];
+
+        if (ammoInfo.clip >= wpn.clipSize) return;
+        if (ammoInfo.reserve <= 0 && ammoInfo.reserve !== Infinity) return;
+
+        player.isReloading = true;
+        document.getElementById('hud-reload').classList.add('hidden');
+        soundEngine.playReload();
+
+        setTimeout(() => {
+            if (ammoInfo.reserve === Infinity) {
+                ammoInfo.clip = wpn.clipSize;
+            } else {
+                const needed = wpn.clipSize - ammoInfo.clip;
+                const available = Math.min(needed, ammoInfo.reserve);
+                ammoInfo.clip += available;
+                ammoInfo.reserve -= available;
+            }
+            player.isReloading = false;
+            updateHUD();
+        }, 1000);
+    }
+
+    /* =========================================================================
+       9. ITEM PICKUPS & ENEMY AI ANIMATIONS
+       ========================================================================= */
+    function checkItemPickups() {
+        items.forEach(item => {
+            if (!item.active) return;
+
+            item.group.rotation.y += 0.03;
+
+            const dist = player.position.distanceTo(item.group.position);
+            if (dist < 2.2) {
+                if (item.type === 'medkit') {
+                    if (player.hp < player.maxHp) {
+                        player.hp = Math.min(player.maxHp, player.hp + 35);
+                        item.active = false;
+                        scene.remove(item.group);
+                        soundEngine.playPickup();
+                        showToast('+35 코어 체력 회복!', 'text-emerald-400');
+                    }
+                } else if (item.type === 'ammo') {
+                    Object.keys(player.ammo).forEach(k => {
+                        if (player.ammo[k].reserve !== Infinity) {
+                            player.ammo[k].reserve += WEAPONS[k].clipSize * 2;
+                        }
+                    });
+                    item.active = false;
+                    scene.remove(item.group);
+                    soundEngine.playPickup();
+                    showToast('+탄약 보충 완료!', 'text-yellow-400');
+                } else if (item.type === 'weapon') {
+                    WEAPONS[item.weaponKey].unlocked = true;
+                    item.active = false;
+                    scene.remove(item.group);
+                    soundEngine.playPickup();
+                    switchWeapon(item.weaponKey);
+                    showToast(`[${WEAPONS[item.weaponKey].name}] 획득!`, 'text-cyan-400');
+                }
+                updateHUD();
+            }
+        });
+    }
+
+    function updateEnemies(delta) {
+        const now = Date.now();
+        const time = clock.getElapsedTime();
+
+        if (gameStarted && enemies.length === 0 && !player.isSpawningWave) {
+            player.isSpawningWave = true;
+            setTimeout(() => {
+                startNextWave();
+                player.isSpawningWave = false;
+            }, 1000);
+        }
+
+        enemies.forEach(enemy => {
+            const dir = new THREE.Vector3().subVectors(player.position, enemy.mesh.position);
+            dir.y = 0;
+            const dist = dir.length();
+            dir.normalize();
+
+            enemy.mesh.lookAt(player.position.x, enemy.mesh.position.y, player.position.z);
+
+            // Move towards player
+            if (dist > 2.2) {
+                enemy.mesh.position.addScaledVector(dir, enemy.speed * delta);
+
+                // Humanoid Limb Walking Animation
+                const swing = Math.sin(time * 10 + enemy.animOffset) * 0.5;
+                enemy.leftLeg.rotation.x = swing;
+                enemy.rightLeg.rotation.x = -swing;
+                enemy.leftArm.rotation.x = -swing;
+                enemy.rightArm.rotation.x = swing * 0.5;
+            } else {
+                enemy.leftLeg.rotation.x = 0;
+                enemy.rightLeg.rotation.x = 0;
+            }
+
+            // Shoot at player
+            if (dist < 28 && now - enemy.lastShot > enemy.shootInterval) {
+                enemy.lastShot = now;
+                enemyShootLaser(enemy);
+            }
+        });
+    }
+
+    function enemyShootLaser(enemy) {
+        const startPos = enemy.mesh.position.clone().add(new THREE.Vector3(0, 1.6, 0));
+        const targetPos = player.position.clone();
+        const dir = new THREE.Vector3().subVectors(targetPos, startPos).normalize();
+
+        const laserMat = new THREE.MeshBasicMaterial({ color: 0xff007f });
+        const laserMesh = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), laserMat);
+        laserMesh.position.copy(startPos);
+        scene.add(laserMesh);
+
+        bullets.push({
+            mesh: laserMesh,
+            dir: dir,
+            speed: 28,
+            damage: enemy.damage,
+            createdAt: Date.now()
+        });
+    }
+
+    function updateBullets(delta) {
+        const now = Date.now();
+        for (let i = bullets.length - 1; i >= 0; i--) {
+            const b = bullets[i];
+            b.mesh.position.addScaledVector(b.dir, b.speed * delta);
+
+            if (b.mesh.position.distanceTo(player.position) < 1.2) {
+                damagePlayer(b.damage);
+                scene.remove(b.mesh);
+                bullets.splice(i, 1);
+                continue;
+            }
+
+            if (now - b.createdAt > 2500) {
+                scene.remove(b.mesh);
+                bullets.splice(i, 1);
+            }
+        }
+    }
+
+    function damagePlayer(amount) {
+        player.hp = Math.max(0, player.hp - amount);
+        soundEngine.playPlayerHurt();
+        triggerDamageVignette();
+        screenShakeIntensity = 0.08;
+        updateHUD();
+
+        if (player.hp <= 0) {
+            gameOver();
+        }
+    }
+
+    function spawnImpactParticles(pos, colorHex = 0x00f0ff, count = 5) {
+        const pMat = colorHex === 0xff007f ? SHARED_MATERIALS.magentaParticle : SHARED_MATERIALS.cyanParticle;
+        
+        for (let i = 0; i < count; i++) {
+            const p = new THREE.Mesh(SHARED_GEOMETRIES.particle, pMat);
+            p.position.copy(pos);
+            scene.add(p);
+
+            const vel = new THREE.Vector3(
+                (Math.random() - 0.5) * 6,
+                Math.random() * 5 + 1,
+                (Math.random() - 0.5) * 6
+            );
+
+            particles.push({ mesh: p, vel: vel, life: 0.25 });
+        }
+    }
+
+    function updateParticles(delta) {
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.life -= delta;
+            p.mesh.position.addScaledVector(p.vel, delta);
+
+            if (p.life <= 0) {
+                scene.remove(p.mesh);
+                particles.splice(i, 1);
+            }
+        }
+    }
+
+    /* =========================================================================
+       10. HUD & GAME STATE MANAGEMENT
+       ========================================================================= */
+    function updateHUD() {
+        document.getElementById('hud-wave').innerText = player.wave;
+        document.getElementById('hud-enemies').innerText = enemies.length;
+        document.getElementById('hud-score').innerText = String(player.score).padStart(4, '0');
+        document.getElementById('hud-kills').innerText = player.kills;
+
+        const hpPercent = Math.max(0, (player.hp / player.maxHp) * 100);
+        document.getElementById('hud-hp-bar').style.width = `${hpPercent}%`;
+        document.getElementById('hud-hp-text').innerText = `${Math.ceil(player.hp)} / ${player.maxHp}`;
+
+        const wpn = WEAPONS[player.currentWeaponKey];
+        const ammoInfo = player.ammo[player.currentWeaponKey];
+        document.getElementById('hud-weapon-name').innerText = wpn.name;
+        document.getElementById('hud-ammo-clip').innerText = ammoInfo.clip;
+        document.getElementById('hud-ammo-reserve').innerText = ammoInfo.reserve === Infinity ? '∞' : ammoInfo.reserve;
+
+        const weaponKeys = ['pistol', 'rifle', 'shotgun', 'sniper'];
+        weaponKeys.forEach((k, idx) => {
+            const btn = document.getElementById(`wpn-btn-${idx + 1}`);
+            if (k === player.currentWeaponKey) {
+                btn.className = "w-16 h-16 rounded-xl bg-purple-900/90 border-2 border-cyan-400 flex flex-col items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(0,240,255,0.7)]";
+            } else if (WEAPONS[k].unlocked) {
+                btn.className = "w-16 h-16 rounded-xl bg-purple-950/80 border border-pink-500/50 flex flex-col items-center justify-center text-pink-300";
+            } else {
+                btn.className = "w-16 h-16 rounded-xl bg-slate-900/40 border border-slate-800 flex flex-col items-center justify-center text-slate-600 opacity-50";
+            }
+        });
+    }
+
+    function showFloatingDamageText(pos3D, damage) {
+        const screenPos = pos3D.clone().project(camera);
+        const x = (screenPos.x * .5 + .5) * window.innerWidth;
+        const y = (-(screenPos.y * .5) + .5) * window.innerHeight;
+
+        const layer = document.getElementById('damage-text-layer');
+        const el = document.createElement('div');
+        el.className = 'dmg-float text-xl';
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+        el.innerText = `-${damage}`;
+        layer.appendChild(el);
+
+        setTimeout(() => el.remove(), 600);
+    }
+
+    function expandCrosshair() {
+        const top = document.getElementById('ch-top');
+        const bottom = document.getElementById('ch-bottom');
+        const left = document.getElementById('ch-left');
+        const right = document.getElementById('ch-right');
+
+        top.style.transform = 'translate(-50%, -24px)';
+        bottom.style.transform = 'translate(-50%, 14px)';
+        left.style.transform = 'translate(-24px, -50%)';
+        right.style.transform = 'translate(14px, -50%)';
+
+        setTimeout(() => {
+            top.style.transform = 'translate(-50%, -14px)';
+            bottom.style.transform = 'translate(-50%, 4px)';
+            left.style.transform = 'translate(-14px, -50%)';
+            right.style.transform = 'translate(4px, -50%)';
+        }, 100);
+    }
+
+    function showHitMarker() {
+        const hm = document.getElementById('hit-marker');
+        hm.style.opacity = '1';
+        setTimeout(() => hm.style.opacity = '0', 120);
+    }
+
+    function triggerDamageVignette() {
+        const vig = document.getElementById('damage-vignette');
+        vig.style.opacity = '1';
+        setTimeout(() => vig.style.opacity = '0', 250);
+    }
+
+    function showNotice(text) {
+        const notice = document.getElementById('hud-notice');
+        notice.innerText = text;
+        notice.style.opacity = '1';
+        setTimeout(() => notice.style.opacity = '0', 2000);
+    }
+
+    function showToast(text, colorClass) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast-item bg-purple-950/90 border border-cyan-500/50 px-4 py-2 rounded-xl text-sm font-bold ${colorClass} shadow-[0_0_15px_rgba(0,240,255,0.3)]`;
+        toast.innerText = text;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    function gameOver() {
+        document.exitPointerLock();
+        document.getElementById('gameover-screen').classList.remove('hidden');
+        document.getElementById('go-wave').innerText = player.wave;
+        document.getElementById('go-kills').innerText = player.kills;
+        document.getElementById('go-score').innerText = player.score;
+    }
+
+    function restartGame() {
+        player.hp = 100;
+        player.score = 0;
+        player.kills = 0;
+        player.wave = 1;
+        player.position.set(0, 1.7, 0);
+
+        player.ammo = {
+            pistol: { clip: 12, reserve: Infinity },
+            rifle: { clip: 30, reserve: 150 },
+            shotgun: { clip: 8, reserve: 40 },
+            sniper: { clip: 5, reserve: 25 }
+        };
+
+        WEAPONS.rifle.unlocked = false;
+        WEAPONS.shotgun.unlocked = false;
+        WEAPONS.sniper.unlocked = false;
+
+        enemies.forEach(e => scene.remove(e.mesh));
+        enemies.length = 0;
+        enemyHitboxes.length = 0;
+
+        bullets.forEach(b => scene.remove(b.mesh));
+        bullets.length = 0;
+
+        document.getElementById('gameover-screen').classList.add('hidden');
+        switchWeapon('pistol');
+        document.body.requestPointerLock();
+        gameStarted = true;
+        startNextWave();
+    }
+
+    /* =========================================================================
+       11. MAIN GAME LOOP & INITIALIZATION
+       ========================================================================= */
+    function animate() {
+        requestAnimationFrame(animate);
+
+        const delta = Math.min(clock.getDelta(), 0.1);
+
+        updatePlayerPhysics(delta);
+        updateEnemies(delta);
+        updateBullets(delta);
+        updateParticles(delta);
+
+        renderer.render(scene, camera);
+    }
+
+    window.onload = function () {
+        initScene();
+        setupControls();
+
+        document.getElementById('btn-start').addEventListener('click', () => {
+            soundEngine.init();
+            document.body.requestPointerLock();
+        });
+
+        document.getElementById('btn-restart').addEventListener('click', () => {
+            restartGame();
+        });
+
+        document.addEventListener('pointerlockchange', () => {
+            if (document.pointerLockElement === document.body) {
+                isPointerLocked = true;
+                document.getElementById('start-screen').classList.add('hidden');
+                if (!gameStarted) {
+                    gameStarted = true;
+                    startNextWave();
+                }
+            } else {
+                isPointerLocked = false;
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    };
     </script>
 </body>
 </html>
